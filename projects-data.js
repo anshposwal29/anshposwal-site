@@ -1,20 +1,23 @@
 /* =============================================================
-   PROJECTS — the source of truth for the Projects & Research page.
+   PROJECTS — OFFLINE FALLBACK for the Projects & Research page.
 
-   This array is the PERMANENT, public list that everyone sees.
+   The live source of truth is now the SERVER (Vercel Blob), read via
+   GET /api/projects. The page loads that on every visit. This array is
+   only used as a fallback when the API can't be reached (e.g. first-ever
+   load before anything is published, or a network hiccup).
 
-   The page also lets you edit projects LIVE in your browser (flip the
-   "Edit" toggle, top-right). Those live edits are saved to your
-   browser's localStorage, so they survive reloads — but only on THIS
-   machine/browser. They do not change what the public sees.
+   To edit the live site: flip the "Edit" toggle (top-right), enter your
+   admin token once, then add / edit / reorder — and click "Publish to
+   site". Publishing POSTs to /api/projects and writes to Blob, so it's
+   instantly live for every visitor. Uploading an image or a PDF in the
+   editor stores the file in Blob and fills in its URL automatically —
+   no more manual assets/ paths.
 
-   To publish your edits so they're permanent and public:
-     1. Edit projects on the page in Edit mode (add / edit / delete / reorder).
-     2. Click "Export JSON" — the whole list is copied to your clipboard.
-     3. Paste it below, replacing the PROJECTS array entirely.
-     4. Commit projects-data.js and redeploy (vercel --prod).
-   ("Reset to published" on the page clears your local edits and shows
-    this file again.)
+   Local edits still buffer in this browser's localStorage as an offline
+   draft; "Revert to published" pulls the server's current list back.
+
+   Optional: keep this array roughly in sync with what you've published
+   so the fallback looks right. ("Export JSON" copies the current list.)
 
    Each project:
      id:          stable unique string (used as the key + for reordering)
@@ -23,7 +26,8 @@
      summary:     one clear line — shown on the card
      description: optional longer text
      tags:        array of short strings
-     image:       optional screenshot — a URL or a path like "assets/foo.png" ("" = none)
+     image:       optional screenshot — a URL (usually a Blob URL now) or "assets/foo.png" ("" = none)
+     pdf:         optional PDF URL (Blob) — adds a "Read" button that opens it inline ("" = none)
      links:       array of { label, url } — label is free text (GitHub, Live demo, Paper (PDF), Notion…)
                   Empty-url links are hidden automatically.
    ============================================================= */

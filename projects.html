@@ -40,10 +40,12 @@
     <!-- edit-mode action bar -->
     <div class="edit-bar">
       <button class="mini-btn primary" id="addBtn">+ Add project</button>
+      <button class="mini-btn" id="publishBtn">Publish to site</button>
+      <span class="pub-status" id="pubStatus"></span>
       <button class="mini-btn" id="exportBtn">Export JSON</button>
       <button class="mini-btn" id="importBtn">Import JSON</button>
-      <button class="mini-btn danger" id="resetBtn">Reset to published</button>
-      <span class="hint">Live edits save to this browser only. Export &amp; paste into projects-data.js to publish.</span>
+      <button class="mini-btn danger" id="resetBtn">Revert to published</button>
+      <span class="hint">Edits buffer in this browser; <b>Publish</b> saves them to the server for everyone.</span>
     </div>
     <div class="import-panel" id="importPanel">
       <textarea id="importText" placeholder="Paste exported JSON here, then click Load…" spellcheck="false"></textarea>
@@ -95,8 +97,36 @@
         <input type="text" id="f_tags" placeholder="Python, NLP, Finance" />
       </div>
       <div class="field">
-        <label for="f_image">Image / screenshot <span style="text-transform:none;font-weight:400;">(URL or assets/… — optional)</span></label>
-        <input type="text" id="f_image" placeholder="assets/screenshot.png  or  https://…" />
+        <label for="f_image">Image / screenshot <span style="text-transform:none;font-weight:400;">(drag a file in, pick one, or paste a URL — optional)</span></label>
+        <div class="uploader" id="imgUploader" data-kind="image">
+          <div class="up-row">
+            <input type="text" id="f_image" placeholder="Drop an image, or https://…" />
+            <button type="button" class="file-btn" data-pick="image">Choose image</button>
+          </div>
+          <div class="up-row" id="imgMeta" style="display:none;">
+            <img class="up-thumb" id="imgThumb" alt="" />
+            <span class="up-hint">Uploaded — URL filled in above.</span>
+          </div>
+          <div class="up-progress" id="imgProg"><i></i></div>
+          <div class="up-err" id="imgErr"></div>
+          <input type="file" id="imgFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
+        </div>
+      </div>
+      <div class="field">
+        <label for="f_pdf">Attach PDF <span style="text-transform:none;font-weight:400;">(a paper, report, deck — readers can scroll it inline)</span></label>
+        <div class="uploader" id="pdfUploader" data-kind="pdf">
+          <div class="up-row">
+            <input type="text" id="f_pdf" placeholder="Drop a PDF, or https://….pdf" />
+            <button type="button" class="file-btn" data-pick="pdf">Choose PDF</button>
+          </div>
+          <div class="up-file" id="pdfMeta" style="display:none;">
+            <span class="pill" id="pdfName">document.pdf</span>
+            <button type="button" class="rm" id="pdfRemove" title="Remove PDF">×</button>
+          </div>
+          <div class="up-progress" id="pdfProg"><i></i></div>
+          <div class="up-err" id="pdfErr"></div>
+          <input type="file" id="pdfFile" accept="application/pdf" hidden />
+        </div>
       </div>
       <div class="field">
         <label>Links</label>
@@ -111,35 +141,101 @@
     </div>
   </div>
 
+  <!-- admin token modal -->
+  <div class="modal-overlay" id="authOverlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle" style="max-width:440px;">
+      <h3 id="authTitle">Enter admin token</h3>
+      <p class="auth-note">This unlocks uploads and publishing. It's your <code>ADMIN_TOKEN</code> — kept only in this tab's session, never stored on the page.</p>
+      <div class="field">
+        <label for="f_token">Admin token</label>
+        <input type="password" id="f_token" placeholder="Paste your token…" autocomplete="off" />
+      </div>
+      <div class="import-msg err" id="authErr" style="min-height:0;"></div>
+      <div class="modal-foot">
+        <button class="mini-btn" id="authCancel" type="button">Cancel</button>
+        <button class="mini-btn primary" id="authSave" type="button">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- inline PDF reader -->
+  <div class="pdf-overlay" id="pdfOverlay" role="dialog" aria-modal="true" aria-label="PDF reader">
+    <div class="pdf-bar">
+      <span class="pdf-title" id="pdfViewTitle">Document</span>
+      <span class="spacer"></span>
+      <a id="pdfOpen" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
+      <a id="pdfDownload" href="#" download>Download</a>
+      <button id="pdfClose" type="button">Close ✕</button>
+    </div>
+    <div class="pdf-body">
+      <iframe id="pdfFrame" title="PDF" src="about:blank"></iframe>
+      <div class="pdf-fallback">
+        <div class="big">This browser won't display the PDF inline (common on iOS Safari). Open it in a new tab instead.</div>
+        <a class="mini-btn primary" id="pdfFallbackOpen" href="#" target="_blank" rel="noopener">Open PDF ↗</a>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script src="projects-data.js"></script>
   <script>
   (function () {
     const CATS = ["Research", "AI/ML", "Software", "Finance", "Social Impact"];
-    const STORE_KEY = "ansh_projects_v1";
-
-    // ---- state: localStorage edits if present, else the published seed ----
-    function seed() { return JSON.parse(JSON.stringify(PROJECTS)); }
-    function load() {
-      try {
-        const raw = localStorage.getItem(STORE_KEY);
-        if (raw) { const d = JSON.parse(raw); if (Array.isArray(d)) return d; }
-      } catch (e) {}
-      return seed();
-    }
-    function persist() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
-
-    let state = load();
-    let activeFilter = "All";
-    let editing = false;
+    const STORE_KEY = "ansh_projects_v1";   // local draft / offline buffer
+    const TOKEN_KEY = "ansh_admin_token";   // sessionStorage — this tab only
+    const BLOB_CLIENT = "https://esm.sh/@vercel/blob@2/client"; // lazy, edit-mode only
+    const MAX_BYTES = 25 * 1024 * 1024;
+    const OK_TYPES = ["application/pdf", "image/png", "image/jpeg", "image/webp", "image/gif"];
 
     // ---- helpers ----
     const $ = (id) => document.getElementById(id);
     function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
     function safeUrl(u) { u = String(u || "").trim(); return /^\s*javascript:/i.test(u) ? "#" : u; }
     function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2400); }
+    function fileNameFromUrl(u) { try { const p = new URL(u, location.href).pathname.split("/").pop(); return decodeURIComponent(p || "document.pdf"); } catch (e) { return String(u).split("/").pop() || "document.pdf"; } }
+
+    // ---- state ----
+    function seed() { return JSON.parse(JSON.stringify(typeof PROJECTS !== "undefined" ? PROJECTS : [])); }
+    function loadDraft() {
+      try { const raw = localStorage.getItem(STORE_KEY); if (raw) { const d = JSON.parse(raw); if (Array.isArray(d)) return d; } } catch (e) {}
+      return null;
+    }
+    function persist() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+    let state = loadDraft() || seed();   // shown immediately; replaced by server on load
+    let activeFilter = "All";
+    let editing = false;
+
     function countIn(cat) { return cat === "All" ? state.length : state.filter(p => (p.categories || []).includes(cat)).length; }
+
+    // ---- auth token (sessionStorage) ----
+    function getToken() { try { return sessionStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; } }
+    function setToken(t) { try { sessionStorage.setItem(TOKEN_KEY, t); } catch (e) {} }
+    function clearToken() { try { sessionStorage.removeItem(TOKEN_KEY); } catch (e) {} }
+
+    let authResolver = null;
+    function openAuth() {
+      $("authErr").textContent = "";
+      $("f_token").value = getToken();
+      $("authOverlay").classList.add("show");
+      setTimeout(() => $("f_token").focus(), 30);
+      return new Promise((resolve) => { authResolver = resolve; });
+    }
+    function closeAuth(val) { $("authOverlay").classList.remove("show"); if (authResolver) { authResolver(val); authResolver = null; } }
+    // Resolve to a token, prompting once if we don't have one yet.
+    async function requireToken() {
+      const t = getToken();
+      if (t) return t;
+      return await openAuth();
+    }
+    $("authSave").addEventListener("click", () => {
+      const t = $("f_token").value.trim();
+      if (!t) { $("authErr").textContent = "Paste your token to continue."; return; }
+      setToken(t); closeAuth(t); toast("Token saved for this session");
+    });
+    $("authCancel").addEventListener("click", () => closeAuth(""));
+    $("authOverlay").addEventListener("click", e => { if (e.target === $("authOverlay")) closeAuth(""); });
 
     // ---- filter pills ----
     function renderFilters() {
@@ -155,8 +251,11 @@
     function cardHTML(p) {
       const cats = (p.categories || []).map(c => `<span class="pcat">${esc(c)}</span>`).join("");
       const tags = (p.tags || []).filter(Boolean).map(t => `<span>${esc(t)}</span>`).join("");
+      const read = p.pdf && p.pdf.trim()
+        ? `<a class="read" href="${esc(safeUrl(p.pdf))}" data-read="1" data-title="${esc(p.title || "Document")}" target="_blank" rel="noopener">Read ↗</a>` : "";
       const links = (p.links || []).filter(l => l && l.url && l.url.trim())
         .map(l => `<a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">${esc(l.label || "Link")} ↗</a>`).join("");
+      const linksBlock = (read || links) ? `<div class="plinks">${read}${links}</div>` : "";
       const shot = p.image && p.image.trim()
         ? `<img class="shot" src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">` : "";
       const ctrls = `<div class="card-ctrls">
@@ -174,7 +273,7 @@
             ${p.summary ? `<div class="psummary">${esc(p.summary)}</div>` : ""}
             ${p.description ? `<div class="pdesc">${esc(p.description)}</div>` : ""}
             ${tags ? `<div class="ptags">${tags}</div>` : ""}
-            ${links ? `<div class="plinks">${links}</div>` : ""}
+            ${linksBlock}
           </div>
           ${ctrls}
         </article>`;
@@ -197,13 +296,13 @@
       setTimeout(() => { renderGrid(); grid.style.opacity = "1"; }, 150);
     }
 
-    // ---- reorder (buttons + drag), operating on full state order ----
+    // ---- reorder (buttons + drag) ----
     function indexOfId(id) { return state.findIndex(p => p.id === id); }
     function move(id, dir) {
       const i = indexOfId(id); const j = i + dir;
       if (i < 0 || j < 0 || j >= state.length) return;
       const t = state[i]; state[i] = state[j]; state[j] = t;
-      persist(); renderGrid();
+      onEdited(); renderGrid();
     }
     let dragId = null;
     function wireDrag() {
@@ -218,13 +317,15 @@
           if (!dragId || dragId === targetId) return;
           const from = indexOfId(dragId); const item = state.splice(from, 1)[0];
           const to = indexOfId(targetId); state.splice(to, 0, item);
-          persist(); renderGrid();
+          onEdited(); renderGrid();
         });
       });
     }
 
-    // ---- grid click delegation (edit controls) ----
+    // ---- grid click delegation: "Read" (public) + edit controls ----
     $("projGrid").addEventListener("click", e => {
+      const readLink = e.target.closest("a.read");
+      if (readLink) { e.preventDefault(); openPdf(readLink.getAttribute("href"), readLink.dataset.title || "Document"); return; }
       const btn = e.target.closest("[data-act]"); if (!btn) return;
       const card = e.target.closest(".proj"); const id = card.dataset.id;
       const act = btn.dataset.act;
@@ -233,7 +334,7 @@
       else if (act === "edit") openModal(id);
       else if (act === "del") {
         if (btn.classList.contains("confirm")) {
-          state = state.filter(p => p.id !== id); persist(); renderFilters(); renderGrid(); toast("Deleted");
+          state = state.filter(p => p.id !== id); onEdited(); renderFilters(); renderGrid(); toast("Deleted");
         } else {
           btn.classList.add("confirm"); btn.textContent = "Confirm?";
           clearTimeout(btn._t); btn._t = setTimeout(() => { btn.classList.remove("confirm"); btn.textContent = "Delete"; }, 3000);
@@ -242,7 +343,7 @@
     });
 
     // ---- edit toggle ----
-    $("editToggle").addEventListener("click", () => {
+    $("editToggle").addEventListener("click", async () => {
       editing = !editing;
       document.body.classList.toggle("editing", editing);
       const t = $("editToggle");
@@ -250,9 +351,161 @@
       t.setAttribute("aria-pressed", String(editing));
       t.lastChild.textContent = editing ? " Done" : " Edit";
       renderGrid();
+      if (editing && !getToken()) { await openAuth(); }  // ask once when entering edit mode
     });
 
-    // ---- modal ----
+    // =========================================================
+    //  Uploads — browser -> Vercel Blob directly (25 MB cap)
+    // =========================================================
+    function validateFile(file, kind) {
+      if (!file) return "No file.";
+      if (file.size > MAX_BYTES) return "That file is " + (file.size / 1048576).toFixed(1) + " MB — max is 25 MB.";
+      const type = (file.type || "").toLowerCase();
+      if (kind === "pdf" && type !== "application/pdf") return "Please choose a PDF.";
+      if (kind === "image" && !type.startsWith("image/")) return "Please choose an image.";
+      if (!OK_TYPES.includes(type)) return "Unsupported type: " + (type || "unknown") + ".";
+      return "";
+    }
+
+    async function uploadFile(file, kind, onProgress) {
+      const token = await requireToken();
+      if (!token) throw new Error("Cancelled — no token.");
+      const mod = await import(BLOB_CLIENT);           // lazy CDN import (edit mode only)
+      const safe = (file.name || kind).replace(/[^a-zA-Z0-9._-]/g, "_").slice(-80);
+      const pathname = "uploads/" + kind + "/" + Date.now().toString(36) + "-" + safe;
+      try {
+        const blob = await mod.upload(pathname, file, {
+          access: "public",
+          handleUploadUrl: "/api/upload",
+          clientPayload: token,           // admin token — verified server-side
+          contentType: file.type || undefined,
+          multipart: file.size > 10 * 1048576,
+          onUploadProgress: (p) => { if (onProgress && p && typeof p.percentage === "number") onProgress(p.percentage); },
+        });
+        return blob.url;
+      } catch (err) {
+        const msg = String(err && err.message || err);
+        if (/unauth|401/i.test(msg)) { clearToken(); throw new Error("Token rejected — please re-enter it."); }
+        throw new Error(msg || "Upload failed.");
+      }
+    }
+
+    // wire a dropzone + picker for a given kind
+    function wireUploader(kind) {
+      const cfg = kind === "image"
+        ? { zone: "imgUploader", input: "f_image", file: "imgFile", prog: "imgProg", err: "imgErr" }
+        : { zone: "pdfUploader", input: "f_pdf", file: "pdfFile", prog: "pdfProg", err: "pdfErr" };
+      const zone = $(cfg.zone), fileInput = $(cfg.file), prog = $(cfg.prog), bar = prog.firstElementChild, errEl = $(cfg.err);
+      const pickBtn = zone.querySelector('[data-pick]');
+
+      async function handle(file) {
+        errEl.textContent = "";
+        const v = validateFile(file, kind);
+        if (v) { errEl.textContent = v; return; }
+        prog.classList.add("show"); bar.style.width = "6%"; pickBtn.classList.add("busy"); pickBtn.textContent = "Uploading…";
+        try {
+          const url = await uploadFile(file, kind, (pct) => { bar.style.width = Math.max(6, Math.round(pct)) + "%"; });
+          bar.style.width = "100%";
+          $(cfg.input).value = url;
+          refreshUploaderUI();
+          toast((kind === "pdf" ? "PDF" : "Image") + " uploaded");
+        } catch (e) {
+          errEl.textContent = e.message || "Upload failed.";
+        } finally {
+          pickBtn.classList.remove("busy"); pickBtn.textContent = kind === "pdf" ? "Choose PDF" : "Choose image";
+          setTimeout(() => { prog.classList.remove("show"); bar.style.width = "0"; }, 600);
+        }
+      }
+
+      pickBtn.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", () => { if (fileInput.files[0]) handle(fileInput.files[0]); fileInput.value = ""; });
+      ["dragenter", "dragover"].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add("drag"); }));
+      ["dragleave", "dragend"].forEach(ev => zone.addEventListener(ev, e => { if (e.target === zone) zone.classList.remove("drag"); }));
+      zone.addEventListener("drop", e => { e.preventDefault(); zone.classList.remove("drag"); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if (f) handle(f); });
+    }
+
+    // reflect current f_image / f_pdf values into the little preview rows
+    function refreshUploaderUI() {
+      const img = $("f_image").value.trim();
+      $("imgMeta").style.display = img ? "flex" : "none";
+      if (img) $("imgThumb").src = img;
+      const pdf = $("f_pdf").value.trim();
+      $("pdfMeta").style.display = pdf ? "inline-flex" : "none";
+      if (pdf) $("pdfName").textContent = fileNameFromUrl(pdf);
+    }
+    $("f_image").addEventListener("input", refreshUploaderUI);
+    $("f_pdf").addEventListener("input", refreshUploaderUI);
+    $("pdfRemove").addEventListener("click", () => { $("f_pdf").value = ""; refreshUploaderUI(); });
+
+    // =========================================================
+    //  Publish — POST the whole array to /api/projects
+    // =========================================================
+    let pubTimer = null;
+    function setPubStatus(kind, text) {
+      const el = $("pubStatus"); el.className = "pub-status" + (kind ? " " + kind : "");
+      el.innerHTML = (kind === "busy" ? '<span class="sp"></span>' : "") + esc(text || "");
+    }
+    // called after any local edit: buffer locally, then debounce a publish
+    function onEdited() {
+      persist();
+      if (!getToken()) { setPubStatus("", "Saved locally · Publish to go live"); return; }
+      clearTimeout(pubTimer);
+      setPubStatus("busy", "Saving…");
+      pubTimer = setTimeout(() => publishToServer(true), 900);
+    }
+
+    async function publishToServer(silent) {
+      const token = await requireToken();
+      if (!token) { setPubStatus("err", "Publish needs your token"); return false; }
+      setPubStatus("busy", "Publishing…");
+      try {
+        const res = await fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-admin-token": token },
+          body: JSON.stringify({ projects: state })
+        });
+        if (res.status === 401) { clearToken(); setPubStatus("err", "Token rejected — re-enter to publish"); if (!silent) toast("Token rejected"); return false; }
+        if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.error || ("HTTP " + res.status)); }
+        const j = await res.json();
+        const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        setPubStatus("ok", "Published ✓ " + time);
+        if (!silent) toast("Published to the site");
+        return true;
+      } catch (e) {
+        setPubStatus("err", "Offline — saved locally");
+        if (!silent) toast("Couldn't reach the server — saved locally");
+        return false;
+      }
+    }
+    $("publishBtn").addEventListener("click", () => publishToServer(false));
+
+    // =========================================================
+    //  Inline PDF reader
+    // =========================================================
+    const IS_IOS = /iP(hone|ad|od)/.test(navigator.platform || "") ||
+      (/(Mac)/.test(navigator.userAgent) && "ontouchend" in document) ||
+      /iPad|iPhone|iPod/.test(navigator.userAgent || "");
+    function openPdf(url, title) {
+      url = safeUrl(url); if (!url || url === "#") return;
+      $("pdfViewTitle").textContent = title || fileNameFromUrl(url);
+      $("pdfOpen").href = url; $("pdfDownload").href = url; $("pdfFallbackOpen").href = url;
+      const ov = $("pdfOverlay");
+      ov.classList.toggle("native", IS_IOS);
+      if (!IS_IOS) $("pdfFrame").src = url + "#view=FitH&toolbar=1";
+      ov.classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+    function closePdf() {
+      $("pdfOverlay").classList.remove("show");
+      $("pdfFrame").src = "about:blank";
+      document.body.style.overflow = "";
+    }
+    $("pdfClose").addEventListener("click", closePdf);
+    $("pdfOverlay").addEventListener("click", e => { if (e.target === $("pdfOverlay")) closePdf(); });
+
+    // =========================================================
+    //  Edit / add modal
+    // =========================================================
     function linkRowHTML(l) {
       l = l || { label: "", url: "" };
       return `<div class="link-row">
@@ -265,12 +518,15 @@
       const p = id ? state.find(x => x.id === id) : null;
       $("modalTitle").textContent = p ? "Edit project" : "Add project";
       $("modalErr").textContent = "";
+      $("imgErr").textContent = ""; $("pdfErr").textContent = "";
       $("f_id").value = p ? p.id : "";
       $("f_title").value = p ? p.title || "" : "";
       $("f_summary").value = p ? p.summary || "" : "";
       $("f_desc").value = p ? p.description || "" : "";
       $("f_tags").value = p ? (p.tags || []).join(", ") : "";
       $("f_image").value = p ? p.image || "" : "";
+      $("f_pdf").value = p ? p.pdf || "" : "";
+      refreshUploaderUI();
       const chosen = p ? (p.categories || []) : [];
       $("f_cats").innerHTML = CATS.map(c =>
         `<label class="cat-choice${chosen.includes(c) ? " checked" : ""}"><input type="checkbox" value="${esc(c)}"${chosen.includes(c) ? " checked" : ""}> ${esc(c)}</label>`
@@ -302,17 +558,25 @@
         title, categories: cats,
         summary: $("f_summary").value.trim(),
         description: $("f_desc").value.trim(),
-        tags, image: $("f_image").value.trim(), links
+        tags,
+        image: $("f_image").value.trim(),
+        pdf: $("f_pdf").value.trim(),
+        links
       };
       const i = indexOfId(obj.id);
       if (i >= 0) state[i] = obj; else state.push(obj);
-      persist(); closeModal(); renderFilters(); renderGrid(); toast(i >= 0 ? "Saved" : "Project added");
+      onEdited(); closeModal(); renderFilters(); renderGrid(); toast(i >= 0 ? "Saved" : "Project added");
     });
     $("modalCancel").addEventListener("click", closeModal);
     $("modalOverlay").addEventListener("click", e => { if (e.target === $("modalOverlay")) closeModal(); });
-    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+    document.addEventListener("keydown", e => {
+      if (e.key !== "Escape") return;
+      if ($("pdfOverlay").classList.contains("show")) return closePdf();
+      if ($("authOverlay").classList.contains("show")) return closeAuth("");
+      closeModal();
+    });
 
-    // ---- action bar: add / export / import / reset ----
+    // ---- action bar: add / export / import / revert ----
     $("addBtn").addEventListener("click", () => openModal(null));
     $("exportBtn").addEventListener("click", async () => {
       const json = JSON.stringify(state, null, 2);
@@ -326,30 +590,55 @@
         const d = JSON.parse($("importText").value);
         if (!Array.isArray(d)) throw new Error("JSON must be an array of projects.");
         d.forEach((p, i) => { if (!p.id) p.id = "p-" + Date.now().toString(36) + i; });
-        state = d; persist(); renderFilters(); renderGrid();
+        state = d; onEdited(); renderFilters(); renderGrid();
         msg.className = "import-msg ok"; msg.textContent = "Loaded " + d.length + " projects.";
         toast("Imported");
       } catch (err) { msg.className = "import-msg err"; msg.textContent = "Couldn't parse: " + err.message; }
     });
-    $("resetBtn").addEventListener("click", function () {
+    // Revert local draft back to whatever the server currently has published.
+    $("resetBtn").addEventListener("click", async function () {
       if (this.dataset.confirm) {
-        try { localStorage.removeItem(STORE_KEY); } catch (e) {}
-        state = seed(); activeFilter = "All"; renderFilters(); renderGrid();
-        this.textContent = "Reset to published"; delete this.dataset.confirm; toast("Reset to the published list");
+        delete this.dataset.confirm; this.textContent = "Revert to published";
+        const ok = await fetchFromServer();
+        if (ok) { try { localStorage.removeItem(STORE_KEY); } catch (e) {} persist(); activeFilter = "All"; renderFilters(); renderGrid(); toast("Reverted to the published list"); setPubStatus("", ""); }
+        else { toast("Couldn't reach the server"); }
       } else {
-        this.dataset.confirm = "1"; this.textContent = "Sure? clears local edits";
-        setTimeout(() => { this.textContent = "Reset to published"; delete this.dataset.confirm; }, 3000);
+        this.dataset.confirm = "1"; this.textContent = "Sure? drops local edits";
+        setTimeout(() => { this.textContent = "Revert to published"; delete this.dataset.confirm; }, 3000);
       }
     });
 
     // ---- filter click ----
     $("filters").addEventListener("click", e => { const b = e.target.closest(".filter-pill"); if (b) paintFilter(b.dataset.cat); });
 
+    // =========================================================
+    //  Load: server is the source of truth; fall back gracefully
+    // =========================================================
+    async function fetchFromServer() {
+      try {
+        const res = await fetch("/api/projects", { cache: "no-store" });
+        if (!res.ok) return false;
+        const j = await res.json();
+        if (j && Array.isArray(j.projects)) { state = j.projects; return true; }
+        return false;
+      } catch (e) { return false; }
+    }
+    async function bootstrap() {
+      const ok = await fetchFromServer();
+      if (ok) { persist(); }   // cache the server copy as the offline buffer
+      // if not ok, we keep the draft/seed already in `state`
+      renderFilters();
+      renderGrid();
+    }
+
     // ---- init ----
     $("projGrid").style.transition = "opacity .18s ease";
     $("yr").textContent = new Date().getFullYear();
+    wireUploader("image");
+    wireUploader("pdf");
     renderFilters();
-    renderGrid();
+    renderGrid();       // paint draft/seed immediately
+    bootstrap();        // then reconcile with the server
   })();
   </script>
 </body>

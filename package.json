@@ -1,0 +1,10 @@
+{
+  "name": "personal-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Ansh Oswal — personal site (static pages + a little Vercel serverless for Blob storage).",
+  "dependencies": {
+    "@vercel/blob": "^2.5.0"
+  }
+}

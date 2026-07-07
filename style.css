@@ -289,3 +289,71 @@ body.editing .proj { cursor: grab; }
   .link-row { flex-wrap: wrap; }
   .link-row input.lbl { flex: 1 1 100%; }
 }
+
+/* =============================================================
+   Storage backend additions — uploads, PDF reader, publish, auth
+   ============================================================= */
+
+/* file uploader (drag-drop + picker) inside the edit modal */
+.uploader {
+  display: flex; flex-direction: column; gap: 8px;
+  border: 1px dashed var(--line-2); border-radius: 10px;
+  padding: 12px; background: var(--bg-2); transition: border-color .18s, background .18s;
+}
+.uploader.drag { border-color: var(--accent); background: rgba(86,207,225,0.06); }
+.uploader .up-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.uploader .up-hint { color: var(--muted); font-size: 12px; }
+.uploader input[type=text], .uploader input[type=url] { flex: 1; min-width: 160px; }
+.file-btn {
+  font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  color: var(--text); background: var(--panel-2); border: 1px solid var(--line-2);
+  border-radius: 8px; padding: 7px 12px; transition: border-color .18s, color .18s;
+}
+.file-btn:hover { border-color: var(--accent); color: var(--accent); }
+.file-btn.busy { opacity: .6; pointer-events: none; }
+.up-thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 7px; border: 1px solid var(--line-2); background: var(--bg); }
+.up-file { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-soft); }
+.up-file .pill { background: rgba(86,207,225,0.1); border: 1px solid rgba(86,207,225,0.28); color: var(--accent); border-radius: 999px; padding: 2px 10px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.up-file .rm { background: transparent; border: 0; color: var(--muted); cursor: pointer; font-size: 15px; }
+.up-file .rm:hover { color: #e06666; }
+.up-progress { height: 4px; border-radius: 999px; background: var(--panel-2); overflow: hidden; display: none; }
+.up-progress.show { display: block; }
+.up-progress > i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .15s ease; }
+.up-err { color: #e78a8a; font-size: 12.5px; }
+
+/* "Read" (inline PDF) card action — accent variant of a card link */
+.proj .plinks a.read { border-color: var(--accent); color: var(--accent); }
+.proj .plinks a.read:hover { background: var(--accent); color: var(--bg); }
+
+/* publish button + status in the edit bar */
+.pub-status { font-size: 12.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+.pub-status.ok { color: var(--accent); }
+.pub-status.err { color: #e78a8a; }
+.pub-status .sp { width: 11px; height: 11px; border: 2px solid var(--line-2); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* PDF reader overlay */
+.pdf-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(6,8,12,0.9); backdrop-filter: blur(4px); display: none; flex-direction: column; }
+.pdf-overlay.show { display: flex; }
+.pdf-bar { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--line); background: var(--bg-2); }
+.pdf-bar .pdf-title { font-family: 'Fraunces', serif; font-size: 16px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pdf-bar .spacer { flex: 1; }
+.pdf-bar a, .pdf-bar button {
+  font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; white-space: nowrap;
+  color: var(--text); background: transparent; border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 12px; transition: border-color .18s, color .18s;
+}
+.pdf-bar a:hover, .pdf-bar button:hover { border-color: var(--accent); color: var(--accent); }
+.pdf-body { flex: 1; position: relative; background: #1b1f27; }
+.pdf-body iframe, .pdf-body embed { width: 100%; height: 100%; border: 0; display: block; }
+.pdf-fallback { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 30px; color: var(--text-soft); }
+.pdf-overlay.native .pdf-body iframe, .pdf-overlay.native .pdf-body embed { display: none; }
+.pdf-overlay.native .pdf-fallback { display: flex; }
+.pdf-fallback .big { font-size: 15px; color: var(--muted); max-width: 42ch; }
+
+/* auth (token) modal reuses .modal; nothing extra needed beyond spacing */
+.auth-note { color: var(--muted); font-size: 13px; margin: -6px 0 14px; line-height: 1.5; }
+
+@media (max-width: 560px) {
+  .pdf-bar { flex-wrap: wrap; gap: 8px; }
+  .pdf-bar .pdf-title { flex: 1 1 100%; }
+}
