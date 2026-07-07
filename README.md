@@ -29,7 +29,7 @@ npm i -g vercel
 vercel --prod        # framework preset: Other
 ```
 
-You'll get a free `anshoswal.vercel.app` URL. Add a custom domain (`anshoswal.com`, ~$10–15/yr) later under Project → Settings → Domains; hosting stays free.
+You'll get a free `anshposwal.vercel.app` URL. Add a custom domain (`anshoswal.com`, ~$10–15/yr) later under Project → Settings → Domains; hosting stays free.
 
 ## Add a project
 
