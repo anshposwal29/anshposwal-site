@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Projects — Ansh Pritam Oswal</title>
+<meta name="description" content="Projects and research by Ansh Pritam Oswal — code, screenshots, and write-ups." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="aurora"></div>
+
+  <nav class="top">
+    <div class="wrap row">
+      <a class="brand" href="index.html">Ansh Oswal<span class="dot">.</span></a>
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="projects.html" class="active">Projects</a>
+        <a class="cta" href="mailto:ansh.p.oswal.29@dartmouth.edu">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <div class="page-head">
+      <div class="eyebrow">Selected work</div>
+      <h1>Projects &amp; <span style="background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;">Research</span></h1>
+      <p class="sub">Code, research, and things I've shipped. Each card links to the repo, a live demo, screenshots, or a write-up where available.</p>
+    </div>
+
+    <section style="padding-top:26px;">
+      <div class="proj-grid" id="projGrid"></div>
+    </section>
+
+    <footer>
+      <div class="footlinks">
+        <a href="mailto:ansh.p.oswal.29@dartmouth.edu">Email</a>
+        <a href="https://www.linkedin.com/in/ansh-pritam-oswal" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com/anshposwal29" target="_blank" rel="noopener">GitHub</a>
+        <a href="index.html">Home</a>
+      </div>
+      <div>© <span id="yr"></span> Ansh Pritam Oswal</div>
+    </footer>
+  </div>
+
+  <!-- =========================================================================
+       HOW TO ADD A PROJECT  ⤵
+       Copy one { } block below and fill it in. Every field except "title" and
+       "desc" is optional — leave links out and the button just won't appear.
+         image : path to a screenshot, e.g. "assets/myproject.png" (16:9 looks best)
+         links : label → url. Use for GitHub, Live demo, PDF/doc, Notion, etc.
+                 Put documents in an "assets/" folder and link them:
+                 "Paper (PDF)": "assets/my-paper.pdf"
+       ========================================================================= -->
+  <script>
+    const PROJECTS = [
+      {
+        title: "Prediction Markets Research",
+        desc: "Analysing pricing dynamics and forecast accuracy in prediction markets using Polymarket data. URAD with Prof. Herbert Chang, Dartmouth.",
+        tags: ["Research", "Polymarket", "Forecasting"],
+        image: "",
+        links: { "GitHub": "", "Write-up": "" }
+      },
+      {
+        title: "Mechanistic Interpretability of LLMs",
+        desc: "Investigating anchoring behaviour inside large language models. Co-authored paper in progress with Prof. Herbert Chang, Dartmouth.",
+        tags: ["Interpretability", "LLMs", "Research"],
+        image: "",
+        links: { "Paper (WIP)": "" }
+      },
+      {
+        title: "Evergreen AI — Clinical Dashboard",
+        desc: "Flask dashboard fusing passive-sensing data (sleep, heart rate, location) with chatbot signals, plus an automated AI engine that flags acute clinical risk.",
+        tags: ["Flask", "Python", "Health AI"],
+        image: "",
+        links: { "GitHub": "", "Demo": "" }
+      },
+      {
+        title: "NLP + Finance Sentiment Model",
+        desc: "Python model reading real-time news and social sentiment to anticipate stock fluctuations, using weighted judgement algorithms.",
+        tags: ["NLP", "Python", "Finance"],
+        image: "",
+        links: { "GitHub": "" }
+      },
+      {
+        title: "Nudge Theory Field Study",
+        desc: "Qualitative study on the effectiveness of reminder nudges in the service sector, built on 50 interviews. Mentored by Dr. Aparna Venkatesan, LSE.",
+        tags: ["Behavioural", "Research"],
+        image: "",
+        links: { "Paper (PDF)": "" }
+      }
+    ];
+
+    const grid = document.getElementById('projGrid');
+    grid.innerHTML = PROJECTS.map(p => {
+      const shot = p.image ? `<img class="shot" src="${p.image}" alt="${p.title}" loading="lazy">` : '';
+      const tags = (p.tags||[]).map(t=>`<span>${t}</span>`).join('');
+      const links = Object.entries(p.links||{})
+        .filter(([_,url]) => url && url.trim())
+        .map(([label,url])=>`<a href="${url}" target="_blank" rel="noopener">${label} ↗</a>`).join('');
+      return `<article class="proj reveal">
+        ${shot}
+        <div class="body">
+          <div class="ptitle">${p.title}</div>
+          <div class="ptags">${tags}</div>
+          <p class="pdesc">${p.desc}</p>
+          <div class="plinks">${links}</div>
+        </div>
+      </article>`;
+    }).join('');
+
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    const io = new IntersectionObserver((es)=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); }), { threshold:0.1 });
+    document.querySelectorAll('.reveal').forEach((el,i)=>{ el.style.transitionDelay=(i%3*0.06)+'s'; io.observe(el); });
+  </script>
+</body>
+</html>
