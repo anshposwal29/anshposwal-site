@@ -3,6 +3,7 @@ assets_photos/
 
 # Internal / working files not meant for the live site
 CLAUDE_CODE_PROMPT.md
+REBUILD_PROMPT.md
 Ansh_Oswal.vcf
 
 # OS cruft

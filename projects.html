@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Projects — Ansh Pritam Oswal</title>
-<meta name="description" content="Projects and research by Ansh Pritam Oswal — code, screenshots, and write-ups." />
+<title>Projects &amp; Research — Ansh Pritam Oswal</title>
+<meta name="description" content="Projects and research by Ansh Pritam Oswal — filterable by area, with code, papers, and demos where available." />
+<meta name="theme-color" content="#0e1116" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="aurora"></div>
-
   <nav class="top">
     <div class="wrap row">
       <a class="brand" href="home.html">Ansh Oswal<span class="dot">.</span></a>
@@ -26,13 +25,37 @@
 
   <div class="wrap">
     <div class="page-head">
-      <div class="eyebrow">Selected work</div>
-      <h1>Projects &amp; <span style="background:linear-gradient(120deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent;">Research</span></h1>
-      <p class="sub">Code, research, and things I've shipped. Each card links to the repo, a live demo, screenshots, or a write-up where available.</p>
+      <div class="eyebrow">Projects &amp; Research</div>
+      <h1>Things I've built and looked into</h1>
+      <p class="sub">Research, models, and side projects. Filter by area, or open a card for the code, paper, or demo where there is one.</p>
     </div>
 
-    <section style="padding-top:26px;">
+    <div class="proj-toolbar">
+      <div class="filters" id="filters"><!-- filter pills injected --></div>
+      <button class="edit-toggle" id="editToggle" aria-pressed="false">
+        <span class="dot-ind"></span> Edit
+      </button>
+    </div>
+
+    <!-- edit-mode action bar -->
+    <div class="edit-bar">
+      <button class="mini-btn primary" id="addBtn">+ Add project</button>
+      <button class="mini-btn" id="exportBtn">Export JSON</button>
+      <button class="mini-btn" id="importBtn">Import JSON</button>
+      <button class="mini-btn danger" id="resetBtn">Reset to published</button>
+      <span class="hint">Live edits save to this browser only. Export &amp; paste into projects-data.js to publish.</span>
+    </div>
+    <div class="import-panel" id="importPanel">
+      <textarea id="importText" placeholder="Paste exported JSON here, then click Load…" spellcheck="false"></textarea>
+      <div style="display:flex;gap:10px;margin-top:8px;align-items:center;">
+        <button class="mini-btn primary" id="importLoad">Load</button>
+        <span class="import-msg" id="importMsg"></span>
+      </div>
+    </div>
+
+    <section style="border-top:none;padding-top:8px;">
       <div class="proj-grid" id="projGrid"></div>
+      <div class="proj-empty" id="projEmpty" style="display:none;">Nothing here in this category yet.</div>
     </section>
 
     <footer>
@@ -46,75 +69,288 @@
     </footer>
   </div>
 
-  <!-- =========================================================================
-       HOW TO ADD A PROJECT  ⤵
-       Copy one { } block below and fill it in. Every field except "title" and
-       "desc" is optional — leave links out and the button just won't appear.
-         image : path to a screenshot, e.g. "assets/myproject.png" (16:9 looks best)
-         links : label → url. Use for GitHub, Live demo, PDF/doc, Notion, etc.
-                 Put documents in an "assets/" folder and link them:
-                 "Paper (PDF)": "assets/my-paper.pdf"
-       ========================================================================= -->
+  <!-- edit / add modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Edit project</h3>
+      <input type="hidden" id="f_id" />
+      <div class="field">
+        <label for="f_title">Title</label>
+        <input type="text" id="f_title" placeholder="Project name" />
+      </div>
+      <div class="field">
+        <label>Categories</label>
+        <div class="cat-choices" id="f_cats"></div>
+      </div>
+      <div class="field">
+        <label for="f_summary">One-line summary</label>
+        <input type="text" id="f_summary" placeholder="What it is, in one line" />
+      </div>
+      <div class="field">
+        <label for="f_desc">Longer description</label>
+        <textarea id="f_desc" placeholder="A little more detail (optional)"></textarea>
+      </div>
+      <div class="field">
+        <label for="f_tags">Tags <span style="text-transform:none;font-weight:400;">(comma-separated)</span></label>
+        <input type="text" id="f_tags" placeholder="Python, NLP, Finance" />
+      </div>
+      <div class="field">
+        <label for="f_image">Image / screenshot <span style="text-transform:none;font-weight:400;">(URL or assets/… — optional)</span></label>
+        <input type="text" id="f_image" placeholder="assets/screenshot.png  or  https://…" />
+      </div>
+      <div class="field">
+        <label>Links</label>
+        <div id="f_links"></div>
+        <button class="mini-btn" id="addLinkBtn" type="button" style="margin-top:2px;">+ Add link</button>
+      </div>
+      <div class="import-msg err" id="modalErr" style="min-height:0;"></div>
+      <div class="modal-foot">
+        <button class="mini-btn" id="modalCancel" type="button">Cancel</button>
+        <button class="mini-btn primary" id="modalSave" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="projects-data.js"></script>
   <script>
-    const PROJECTS = [
-      {
-        title: "Prediction Markets Research",
-        desc: "Analysing pricing dynamics and forecast accuracy in prediction markets using Polymarket data. URAD with Prof. Herbert Chang, Dartmouth.",
-        tags: ["Research", "Polymarket", "Forecasting"],
-        image: "",
-        links: { "GitHub": "", "Write-up": "" }
-      },
-      {
-        title: "Mechanistic Interpretability of LLMs",
-        desc: "Investigating anchoring behaviour inside large language models. Co-authored paper in progress with Prof. Herbert Chang, Dartmouth.",
-        tags: ["Interpretability", "LLMs", "Research"],
-        image: "",
-        links: { "Paper (WIP)": "" }
-      },
-      {
-        title: "Evergreen AI — Clinical Dashboard",
-        desc: "Flask dashboard fusing passive-sensing data (sleep, heart rate, location) with chatbot signals, plus an automated AI engine that flags acute clinical risk.",
-        tags: ["Flask", "Python", "Health AI"],
-        image: "",
-        links: { "GitHub": "", "Demo": "" }
-      },
-      {
-        title: "NLP + Finance Sentiment Model",
-        desc: "Python model reading real-time news and social sentiment to anticipate stock fluctuations, using weighted judgement algorithms.",
-        tags: ["NLP", "Python", "Finance"],
-        image: "",
-        links: { "GitHub": "" }
-      },
-      {
-        title: "Nudge Theory Field Study",
-        desc: "Qualitative study on the effectiveness of reminder nudges in the service sector, built on 50 interviews. Mentored by Dr. Aparna Venkatesan, LSE.",
-        tags: ["Behavioural", "Research"],
-        image: "",
-        links: { "Paper (PDF)": "" }
+  (function () {
+    const CATS = ["Research", "AI/ML", "Software", "Finance", "Social Impact"];
+    const STORE_KEY = "ansh_projects_v1";
+
+    // ---- state: localStorage edits if present, else the published seed ----
+    function seed() { return JSON.parse(JSON.stringify(PROJECTS)); }
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (raw) { const d = JSON.parse(raw); if (Array.isArray(d)) return d; }
+      } catch (e) {}
+      return seed();
+    }
+    function persist() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+    let state = load();
+    let activeFilter = "All";
+    let editing = false;
+
+    // ---- helpers ----
+    const $ = (id) => document.getElementById(id);
+    function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+    function safeUrl(u) { u = String(u || "").trim(); return /^\s*javascript:/i.test(u) ? "#" : u; }
+    function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2400); }
+    function countIn(cat) { return cat === "All" ? state.length : state.filter(p => (p.categories || []).includes(cat)).length; }
+
+    // ---- filter pills ----
+    function renderFilters() {
+      const all = ["All"].concat(CATS);
+      $("filters").innerHTML = all.map(c =>
+        `<button class="filter-pill${c === activeFilter ? " active" : ""}" data-cat="${esc(c)}">${esc(c)}<span class="count">${countIn(c)}</span></button>`
+      ).join("");
+    }
+
+    // ---- grid ----
+    function visible() { return activeFilter === "All" ? state : state.filter(p => (p.categories || []).includes(activeFilter)); }
+
+    function cardHTML(p) {
+      const cats = (p.categories || []).map(c => `<span class="pcat">${esc(c)}</span>`).join("");
+      const tags = (p.tags || []).filter(Boolean).map(t => `<span>${esc(t)}</span>`).join("");
+      const links = (p.links || []).filter(l => l && l.url && l.url.trim())
+        .map(l => `<a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">${esc(l.label || "Link")} ↗</a>`).join("");
+      const shot = p.image && p.image.trim()
+        ? `<img class="shot" src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">` : "";
+      const ctrls = `<div class="card-ctrls">
+          <button class="icon-btn" data-act="up" title="Move up">↑</button>
+          <button class="icon-btn" data-act="down" title="Move down">↓</button>
+          <span class="spacer"></span>
+          <button class="icon-btn" data-act="edit">Edit</button>
+          <button class="icon-btn danger" data-act="del">Delete</button>
+        </div>`;
+      return `<article class="proj" data-id="${esc(p.id)}" draggable="${editing}">
+          ${shot}
+          <div class="pbody">
+            <div class="pcats">${cats}</div>
+            <div class="ptitle">${esc(p.title)}</div>
+            ${p.summary ? `<div class="psummary">${esc(p.summary)}</div>` : ""}
+            ${p.description ? `<div class="pdesc">${esc(p.description)}</div>` : ""}
+            ${tags ? `<div class="ptags">${tags}</div>` : ""}
+            ${links ? `<div class="plinks">${links}</div>` : ""}
+          </div>
+          ${ctrls}
+        </article>`;
+    }
+
+    function renderGrid() {
+      const items = visible();
+      const grid = $("projGrid");
+      grid.innerHTML = items.map(cardHTML).join("");
+      $("projEmpty").style.display = items.length ? "none" : "block";
+      if (editing) wireDrag();
+    }
+
+    function paintFilter(cat) {
+      if (cat === activeFilter) return;
+      activeFilter = cat;
+      renderFilters();
+      const grid = $("projGrid");
+      grid.style.opacity = "0";
+      setTimeout(() => { renderGrid(); grid.style.opacity = "1"; }, 150);
+    }
+
+    // ---- reorder (buttons + drag), operating on full state order ----
+    function indexOfId(id) { return state.findIndex(p => p.id === id); }
+    function move(id, dir) {
+      const i = indexOfId(id); const j = i + dir;
+      if (i < 0 || j < 0 || j >= state.length) return;
+      const t = state[i]; state[i] = state[j]; state[j] = t;
+      persist(); renderGrid();
+    }
+    let dragId = null;
+    function wireDrag() {
+      document.querySelectorAll(".proj").forEach(card => {
+        card.addEventListener("dragstart", e => { dragId = card.dataset.id; card.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
+        card.addEventListener("dragend", () => { dragId = null; document.querySelectorAll(".proj").forEach(c => c.classList.remove("dragging", "drop-target")); });
+        card.addEventListener("dragover", e => { e.preventDefault(); card.classList.add("drop-target"); });
+        card.addEventListener("dragleave", () => card.classList.remove("drop-target"));
+        card.addEventListener("drop", e => {
+          e.preventDefault();
+          const targetId = card.dataset.id;
+          if (!dragId || dragId === targetId) return;
+          const from = indexOfId(dragId); const item = state.splice(from, 1)[0];
+          const to = indexOfId(targetId); state.splice(to, 0, item);
+          persist(); renderGrid();
+        });
+      });
+    }
+
+    // ---- grid click delegation (edit controls) ----
+    $("projGrid").addEventListener("click", e => {
+      const btn = e.target.closest("[data-act]"); if (!btn) return;
+      const card = e.target.closest(".proj"); const id = card.dataset.id;
+      const act = btn.dataset.act;
+      if (act === "up") move(id, -1);
+      else if (act === "down") move(id, 1);
+      else if (act === "edit") openModal(id);
+      else if (act === "del") {
+        if (btn.classList.contains("confirm")) {
+          state = state.filter(p => p.id !== id); persist(); renderFilters(); renderGrid(); toast("Deleted");
+        } else {
+          btn.classList.add("confirm"); btn.textContent = "Confirm?";
+          clearTimeout(btn._t); btn._t = setTimeout(() => { btn.classList.remove("confirm"); btn.textContent = "Delete"; }, 3000);
+        }
       }
-    ];
+    });
 
-    const grid = document.getElementById('projGrid');
-    grid.innerHTML = PROJECTS.map(p => {
-      const shot = p.image ? `<img class="shot" src="${p.image}" alt="${p.title}" loading="lazy">` : '';
-      const tags = (p.tags||[]).map(t=>`<span>${t}</span>`).join('');
-      const links = Object.entries(p.links||{})
-        .filter(([_,url]) => url && url.trim())
-        .map(([label,url])=>`<a href="${url}" target="_blank" rel="noopener">${label} ↗</a>`).join('');
-      return `<article class="proj reveal">
-        ${shot}
-        <div class="body">
-          <div class="ptitle">${p.title}</div>
-          <div class="ptags">${tags}</div>
-          <p class="pdesc">${p.desc}</p>
-          <div class="plinks">${links}</div>
-        </div>
-      </article>`;
-    }).join('');
+    // ---- edit toggle ----
+    $("editToggle").addEventListener("click", () => {
+      editing = !editing;
+      document.body.classList.toggle("editing", editing);
+      const t = $("editToggle");
+      t.classList.toggle("on", editing);
+      t.setAttribute("aria-pressed", String(editing));
+      t.lastChild.textContent = editing ? " Done" : " Edit";
+      renderGrid();
+    });
 
-    document.getElementById('yr').textContent = new Date().getFullYear();
-    const io = new IntersectionObserver((es)=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); }), { threshold:0.1 });
-    document.querySelectorAll('.reveal').forEach((el,i)=>{ el.style.transitionDelay=(i%3*0.06)+'s'; io.observe(el); });
+    // ---- modal ----
+    function linkRowHTML(l) {
+      l = l || { label: "", url: "" };
+      return `<div class="link-row">
+        <input type="text" class="lbl" placeholder="Label (GitHub…)" value="${esc(l.label || "")}">
+        <input type="url" class="url" placeholder="https://…" value="${esc(l.url || "")}">
+        <button type="button" class="rm" title="Remove">×</button>
+      </div>`;
+    }
+    function openModal(id) {
+      const p = id ? state.find(x => x.id === id) : null;
+      $("modalTitle").textContent = p ? "Edit project" : "Add project";
+      $("modalErr").textContent = "";
+      $("f_id").value = p ? p.id : "";
+      $("f_title").value = p ? p.title || "" : "";
+      $("f_summary").value = p ? p.summary || "" : "";
+      $("f_desc").value = p ? p.description || "" : "";
+      $("f_tags").value = p ? (p.tags || []).join(", ") : "";
+      $("f_image").value = p ? p.image || "" : "";
+      const chosen = p ? (p.categories || []) : [];
+      $("f_cats").innerHTML = CATS.map(c =>
+        `<label class="cat-choice${chosen.includes(c) ? " checked" : ""}"><input type="checkbox" value="${esc(c)}"${chosen.includes(c) ? " checked" : ""}> ${esc(c)}</label>`
+      ).join("");
+      const links = p && (p.links || []).length ? p.links : [{ label: "", url: "" }];
+      $("f_links").innerHTML = links.map(linkRowHTML).join("");
+      $("modalOverlay").classList.add("show");
+      $("f_title").focus();
+    }
+    function closeModal() { $("modalOverlay").classList.remove("show"); }
+
+    $("f_cats").addEventListener("change", e => {
+      const lab = e.target.closest(".cat-choice"); if (lab) lab.classList.toggle("checked", e.target.checked);
+    });
+    $("addLinkBtn").addEventListener("click", () => { $("f_links").insertAdjacentHTML("beforeend", linkRowHTML()); });
+    $("f_links").addEventListener("click", e => { if (e.target.classList.contains("rm")) e.target.closest(".link-row").remove(); });
+
+    $("modalSave").addEventListener("click", () => {
+      const title = $("f_title").value.trim();
+      if (!title) { $("modalErr").textContent = "A title is required."; return; }
+      const cats = Array.from($("f_cats").querySelectorAll("input:checked")).map(i => i.value);
+      const tags = $("f_tags").value.split(",").map(s => s.trim()).filter(Boolean);
+      const links = Array.from($("f_links").querySelectorAll(".link-row")).map(r => ({
+        label: r.querySelector(".lbl").value.trim(),
+        url: r.querySelector(".url").value.trim()
+      })).filter(l => l.label || l.url);
+      const obj = {
+        id: $("f_id").value || ("p-" + Date.now().toString(36)),
+        title, categories: cats,
+        summary: $("f_summary").value.trim(),
+        description: $("f_desc").value.trim(),
+        tags, image: $("f_image").value.trim(), links
+      };
+      const i = indexOfId(obj.id);
+      if (i >= 0) state[i] = obj; else state.push(obj);
+      persist(); closeModal(); renderFilters(); renderGrid(); toast(i >= 0 ? "Saved" : "Project added");
+    });
+    $("modalCancel").addEventListener("click", closeModal);
+    $("modalOverlay").addEventListener("click", e => { if (e.target === $("modalOverlay")) closeModal(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+    // ---- action bar: add / export / import / reset ----
+    $("addBtn").addEventListener("click", () => openModal(null));
+    $("exportBtn").addEventListener("click", async () => {
+      const json = JSON.stringify(state, null, 2);
+      try { await navigator.clipboard.writeText(json); toast("Copied JSON to clipboard"); }
+      catch (e) { $("importPanel").classList.add("show"); $("importText").value = json; $("importText").select(); toast("Copy manually from the box"); }
+    });
+    $("importBtn").addEventListener("click", () => { $("importPanel").classList.toggle("show"); $("importMsg").textContent = ""; });
+    $("importLoad").addEventListener("click", () => {
+      const msg = $("importMsg");
+      try {
+        const d = JSON.parse($("importText").value);
+        if (!Array.isArray(d)) throw new Error("JSON must be an array of projects.");
+        d.forEach((p, i) => { if (!p.id) p.id = "p-" + Date.now().toString(36) + i; });
+        state = d; persist(); renderFilters(); renderGrid();
+        msg.className = "import-msg ok"; msg.textContent = "Loaded " + d.length + " projects.";
+        toast("Imported");
+      } catch (err) { msg.className = "import-msg err"; msg.textContent = "Couldn't parse: " + err.message; }
+    });
+    $("resetBtn").addEventListener("click", function () {
+      if (this.dataset.confirm) {
+        try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+        state = seed(); activeFilter = "All"; renderFilters(); renderGrid();
+        this.textContent = "Reset to published"; delete this.dataset.confirm; toast("Reset to the published list");
+      } else {
+        this.dataset.confirm = "1"; this.textContent = "Sure? clears local edits";
+        setTimeout(() => { this.textContent = "Reset to published"; delete this.dataset.confirm; }, 3000);
+      }
+    });
+
+    // ---- filter click ----
+    $("filters").addEventListener("click", e => { const b = e.target.closest(".filter-pill"); if (b) paintFilter(b.dataset.cat); });
+
+    // ---- init ----
+    $("projGrid").style.transition = "opacity .18s ease";
+    $("yr").textContent = new Date().getFullYear();
+    renderFilters();
+    renderGrid();
+  })();
   </script>
 </body>
 </html>
