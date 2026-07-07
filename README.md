@@ -1,4 +1,4 @@
-# Ansh Oswal — personal site
+# Ansh Pritam Oswal — personal site
 
 Static, zero-build site. Files:
 
