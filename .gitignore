@@ -11,3 +11,5 @@ Ansh_Oswal.vcf
 # Vercel
 .vercel/
 node_modules/
+.vercel
+.env*
