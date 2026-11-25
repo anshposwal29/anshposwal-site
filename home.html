@@ -3,151 +3,244 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ansh Pritam Oswal — Dartmouth '29</title>
-<meta name="description" content="Ansh Pritam Oswal — math and decision science student at Dartmouth. Underwriting AI at Early Stage InsurTech, and research on prediction markets and language models." />
+<title>Ansh Pritam Oswal</title>
+<meta name="description" content="Ansh Pritam Oswal studies mathematics and decision science at Dartmouth. Research on anchoring in small language models, prediction markets, and steering chatbots." />
 <meta property="og:title" content="Ansh Pritam Oswal" />
-<meta property="og:description" content="Math & decision science at Dartmouth '29. Underwriting AI, and research on prediction markets and language models." />
+<meta property="og:description" content="Mathematics and decision science at Dartmouth. Research on anchoring in small language models, prediction markets, and steering chatbots." />
 <meta property="og:type" content="website" />
-<meta name="theme-color" content="#0e1116" />
+<meta name="theme-color" content="#fbfaf6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#151614" media="(prefers-color-scheme: dark)" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css" />
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="site.css" />
 </head>
 <body>
-  <nav class="top">
-    <div class="wrap row">
-      <a class="brand" href="home.html">Ansh Pritam Oswal<span class="dot">.</span></a>
-      <div class="links">
-        <a href="home.html" class="active">Home</a>
-        <a href="projects.html">Projects</a>
-        <a class="cta" href="mailto:ansh.p.oswal.29@dartmouth.edu">Contact</a>
-      </div>
+<div class="page">
+
+  <aside class="side">
+    <img src="assets/headshot-480.jpg" alt="Ansh Pritam Oswal" width="132" height="132" />
+    <div class="name">Ansh Pritam Oswal</div>
+    <div class="where">Mathematics &amp; decision science<br />Dartmouth College, class of 2029</div>
+
+    <nav aria-label="Sections">
+      <a href="#research">Research</a>
+      <a href="#papers">Papers &amp; essays</a>
+      <a href="#software">Software</a>
+      <a href="#experience">Experience</a>
+      <a href="#education">Education</a>
+    </nav>
+
+    <div class="contact">
+      <a href="mailto:ansh.p.oswal.29@dartmouth.edu">Email</a>
+      <a href="https://github.com/anshposwal29" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/ansh-pritam-oswal" target="_blank" rel="noopener">LinkedIn</a>
     </div>
-  </nav>
+  </aside>
 
-  <header class="hero wrap">
-    <div class="hero-banner reveal">
-      <img class="hero-photo" src="assets/hero-mountain.jpg" alt="Mountains above the clouds" />
-      <img class="avatar" src="assets/profile.jpg" alt="Ansh Pritam Oswal" />
+  <main>
+
+    <div class="intro">
+      <p>I study how people and language models decide when they are unsure. Most of my work measures one of the two against the other.</p>
+      <p>At Dartmouth I work with Herbert Chang on anchoring in small language models and on prediction markets, and with Evergreen AI on a safety classifier and on steering a student wellness chatbot. This term I am a teaching assistant for discrete mathematics. Last summer I was an actuarial and machine learning intern at <a href="https://ipxos.ai" target="_blank" rel="noopener">IPXos</a> in Singapore.</p>
+      <p>I am from Singapore. I run marathons, race triathlons, play chess and play the guitar.</p>
     </div>
-    <div class="hero-text">
-      <div class="eyebrow reveal">Dartmouth '29 · Singapore</div>
-      <h1 class="reveal">Ansh Pritam Oswal</h1>
-      <p class="tagline reveal">I study math and decision science at Dartmouth. These days I'm building AI for insurance underwriting in Singapore, and doing research on prediction markets and what actually goes on inside language models. I mostly like problems where the answer isn't obvious yet.</p>
-      <div class="loc reveal">Singapore &amp; Hanover, NH</div>
-      <div class="cta-row reveal">
-        <a class="btn btn-primary" href="mailto:ansh.p.oswal.29@dartmouth.edu">Get in touch</a>
-        <a class="btn btn-ghost" href="https://www.linkedin.com/in/ansh-pritam-oswal" target="_blank" rel="noopener">LinkedIn</a>
-        <a class="btn btn-ghost" href="https://github.com/anshposwal29" target="_blank" rel="noopener">GitHub</a>
-      </div>
-    </div>
-  </header>
 
-  <main class="wrap">
-    <section>
-      <div class="sec-label">About</div>
-      <p class="lede reveal">I like figuring out how decisions get made, by people and by systems, and building things around that.</p>
-      <p class="prose reveal" style="margin-top:20px;">Right now that means underwriting AI at Early Stage InsurTech, some safety research at Evergreen, and a music program I started back home. Most of what I use day to day comes out of statistics and data classes.</p>
-      <p class="prose reveal">Outside of that I run marathons, race triathlons, play a lot of chess, and mess around on the guitar.</p>
+    <section id="research">
+      <h2>Research</h2>
+
+      <article class="entry">
+        <h3>Three behaviours under one label: what an anchoring audit of a language model measures</h3>
+        <div class="meta">With Herbert Chang · Preprint, September 2026 · Lightning talk at TADA 2026, UC Berkeley</div>
+        <p>We ask six instruction-tuned models (2B to 9B parameters) 506 numeric questions, with anchors set relative to each model's own unanchored answer, and read more than 200,000 answers. Every model anchors, and the smaller model in each family anchors more. A single anchoring index mixes three behaviours: agreeing with the direction word, copying the anchor, and comparing with under-adjustment.</p>
+        <div class="links">
+          <a href="assets/papers/three-behaviours-anchoring-preprint.pdf" target="_blank" rel="noopener">Preprint</a>
+          <a href="https://x0zxslgf02aoxgpb.public.blob.vercel-storage.com/uploads/pdf/mracx545-QSS20_Final_Project_Anchoring_Mechanistic_Interpretability-ElcdGn55XhAGvcsq6nk96HGD2ynTy3.pdf" target="_blank" rel="noopener">Earlier paper (June 2026)</a>
+          <a href="https://github.com/anshposwal29/Anchoring_Mechanistic_Interpretability" target="_blank" rel="noopener">Code for the earlier paper</a>
+          <a href="https://anchoring-website.vercel.app" target="_blank" rel="noopener">Project site</a>
+          <span>Full code to be released</span>
+        </div>
+      </article>
+
+      <article class="entry">
+        <h3>Do the most active traders on a prediction market form a real core?</h3>
+        <div class="meta">In preparation</div>
+        <p>On Polymarket, a small and densely connected group of traders does most of the trading. We test whether that group is more than a by-product of how much each trader trades, whether it profits at the expense of everyone else, and whether its trades move prices toward the correct outcome.</p>
+      </article>
+
+      <article class="entry">
+        <h3>Is a rich core more than its degrees?</h3>
+        <div class="meta">Manuscript and Python package, in preparation</div>
+        <p>Every network has a rich core, so finding one says little. This gives a test that compares the observed core with the one the degree sequence alone would produce, without generating random networks, and applies it to 24 public networks.</p>
+      </article>
+
+      <article class="entry">
+        <h3>Activation steering for warmth and autonomy support in language models</h3>
+        <div class="meta">With Freya Ma and Roshnik Rahat, Evergreen AI · June 2026 to present</div>
+        <p>A pre-specified comparison of steering vectors (CAA, RePS, BiPO) against DPO-LoRA and prompt optimisation in four open models, scored by two model judges that are checked against three human raters. In an earlier round, no method lifted judged warmth above the model's own baseline, and warm phrasing over cold content reproduced most of the judged gain.</p>
+      </article>
+
+      <article class="entry">
+        <h3>Did the price move before the news? Information asymmetry on Polymarket</h3>
+        <div class="meta">With Herbert Chang · Funded undergraduate research, March to June 2026</div>
+        <p>Across 500 Polymarket markets, we matched each price move to the first news report of the event (GDELT, ProQuest) to find windows where the price moved first. One case: an anonymous $400K bet placed at 5.5% hours before resolution, an 18.2x payout consistent with inside information.</p>
+        <div class="links">
+          <a href="https://github.com/anshposwal29/Prediction-Markets" target="_blank" rel="noopener">Code</a>
+        </div>
+      </article>
+
+      <article class="entry">
+        <h3>A recall-first safety risk classifier for student journaling</h3>
+        <div class="meta">Evergreen AI, mentor Michael Heinz · 2026</div>
+        <p>A small open-weight model (Ministral 14B) screens student messages for nine categories of acute risk and pages clinical staff on a flag. I built its 412-case gold standard set from public corpora and tuned the prompts for recall. Moving from three confidence tiers to a present/absent label removed 19 false positives.</p>
+        <div class="links">
+          <a href="https://x0zxslgf02aoxgpb.public.blob.vercel-storage.com/uploads/pdf/mradexst-Evergreen_Risk_Classifier_Public-NPthTm68euYbbK3ijjLAuHvzaXApVH.pdf" target="_blank" rel="noopener">Report</a>
+        </div>
+      </article>
     </section>
 
-    <section>
-      <div class="sec-label">What I'm working on</div>
-      <div class="xp">
-        <div class="xp-item reveal">
-          <div class="xp-head">
-            <span class="xp-role">Underwriting &amp; ML Intern</span>
-            <span class="xp-org">Early Stage InsurTech</span>
-            <span class="xp-when">Jun 2026 — Present · Singapore</span>
-          </div>
-          <p>Building AI workflows and ML models for an insurance operating system — the pricing pipelines, and the audit tooling underwriters use to sanity-check them.</p>
+    <section id="papers">
+      <h2>Papers &amp; essays</h2>
+      <p class="note">Written for courses at Dartmouth.</p>
+
+      <article class="entry small">
+        <h3>Did California's 2018 board gender law (SB 826) affect the market value of California-headquartered public companies?</h3>
+        <div class="meta">With Seohee Cho, Sophia Hinze, Julian Nelson and Eloise Riedel-Drouin · Econometrics, November 2026</div>
+        <p>A difference-in-differences comparison of about 1,300 listed firms in California and Texas, then the law as an instrument for board composition. We find no indication that the gender composition of a board affects market capitalisation.</p>
+        <div class="links">
+          <a href="assets/papers/sb826-board-gender-law.pdf" target="_blank" rel="noopener">Paper</a>
+          <a href="https://github.com/anshposwal29/econ-20-jesas" target="_blank" rel="noopener">Code</a>
         </div>
-        <div class="xp-item reveal">
-          <div class="xp-head">
-            <span class="xp-role">ML Researcher</span>
-            <span class="xp-org">Evergreen AI</span>
-            <span class="xp-when">Apr 2026 — Present · Dartmouth</span>
-          </div>
-          <p>Built a safety classifier (Ministral-14B) that reads student journal entries and sorts them into nine risk categories, tuned to miss as little as possible, with alerts routed to clinical staff over Twilio. Now checking whether fine-tuning these models for mental health makes them easier to break under adversarial prompts.</p>
+      </article>
+
+      <article class="entry small">
+        <h3>How a system knows its own states, and how that affects its choices</h3>
+        <div class="meta">Theories of Consciousness, November 2026</div>
+        <p>Two machines report "I am unsure about this answer." One reads its internal state; the other infers it from its own inputs and outputs. The paper asks whether both are monitoring themselves, and what turns on the answer.</p>
+        <div class="links">
+          <a href="assets/papers/how-a-system-knows-its-own-states.pdf" target="_blank" rel="noopener">Paper</a>
         </div>
-        <div class="xp-item reveal">
-          <div class="xp-head">
-            <span class="xp-role">Software Developer &amp; Project Manager</span>
-            <span class="xp-org">Evergreen AI</span>
-            <span class="xp-when">Jan 2026 — Mar 2026 · Dartmouth</span>
-          </div>
-          <p>Led a team of three on a Flask dashboard that put passive phone-sensor data (sleep, location, heart rate) next to chatbot stats for research coordinators, plus an engine that flagged acute risk and logged interventions as they happened.</p>
+      </article>
+
+      <article class="entry small">
+        <h3>A case for non-phenomenal machine consciousness</h3>
+        <div class="meta">Theories of Consciousness, October 2026</div>
+        <p>Argues for the strongest claim about machine consciousness that does not depend on experience: a machine whose contents are access conscious, and which forms higher-order representations of its own states that it then uses.</p>
+        <div class="links">
+          <a href="assets/papers/non-phenomenal-machine-consciousness.pdf" target="_blank" rel="noopener">Paper</a>
         </div>
-        <div class="xp-item reveal">
-          <div class="xp-head">
-            <span class="xp-role">Founder</span>
-            <span class="xp-org">Music + Vibes = Changing Lives</span>
-            <span class="xp-when">Jun 2024 — Present · Singapore</span>
-          </div>
-          <p>A music program I started for seniors and kids — around 100 seniors and 50 children across 15 partner organisations. It won a Singapore Kindness Award in 2025.</p>
+      </article>
+
+      <article class="entry small">
+        <h3>Lopsided matrix products in the subquadratic 3SUM algorithm</h3>
+        <div class="meta">Scribe notes with a classmate · Topics in algorithms (COSC 39), November 2026</div>
+        <p>The running-time analysis of the lopsided matrix product behind the reduction from Exact Triangle to sparse triangle listing, written for an undergraduate reader.</p>
+        <div class="links">
+          <a href="assets/papers/3sum-lopsided-matrix-product-scribe.pdf" target="_blank" rel="noopener">Notes</a>
         </div>
+      </article>
+
+      <article class="entry small">
+        <h3>Who decides? Free will and its allocation in <em>Brave New World</em></h3>
+        <div class="meta">First-year seminar on utopia, May 2026</div>
+        <p>Free will in Huxley's World State is not abolished but rationed: held by a few and withheld from the many. The essay asks whether that holds for utopias in general.</p>
+        <div class="links">
+          <a href="assets/papers/who-decides-brave-new-world.pdf" target="_blank" rel="noopener">Essay</a>
+        </div>
+      </article>
+
+      <article class="entry small">
+        <h3>Predicting the panic: human decision-making in the age of artificial intelligence</h3>
+        <div class="meta">Writing 5, March 2026</div>
+        <p>A literature review of how models of human choice moved from the rational economic agent, through bounded rationality and prospect theory, to models that learn from observed behaviour.</p>
+        <div class="links">
+          <a href="assets/papers/predicting-the-panic.pdf" target="_blank" rel="noopener">Review</a>
+        </div>
+      </article>
+
+      <article class="entry small">
+        <h3>Hybrid Q-learners and performance evaluation in an asymmetric Hawk-Dove game</h3>
+        <div class="meta">AI and Machine Learning (QSS 45), November 2025 · Academic citation</div>
+        <p>A Q-learner whose state is augmented with a classifier's estimate of how risky the opponent is, played against seven fixed opponents under two reward functions.</p>
+        <div class="links">
+          <a href="assets/papers/hawk-dove-hybrid-q-learners-poster.pdf" target="_blank" rel="noopener">Poster</a>
+        </div>
+      </article>
+    </section>
+
+    <section id="software">
+      <h2>Software</h2>
+
+      <article class="entry small">
+        <h3>Everdash</h3>
+        <div class="meta">Evergreen AI · Flask · team of three, which I led</div>
+        <p>A clinical dashboard that puts passive phone-sensor data (sleep, location, heart rate) next to chatbot conversation statistics, for research coordinators monitoring student check-ins.</p>
+        <div class="links">
+          <a href="https://github.com/anshposwal29/Everdash" target="_blank" rel="noopener">Code</a>
+        </div>
+      </article>
+
+      <article class="entry small">
+        <h3>Maple Story</h3>
+        <div class="meta">Advanced Data Visualization (QSS 19), group project · D3, Scrollama</div>
+        <p>A scroll-driven introduction to research on PFAS and metals in New England maple syrup.</p>
+        <div class="links">
+          <a href="https://github.com/anshposwal29/QSS19-Group_Project" target="_blank" rel="noopener">Code</a>
+        </div>
+      </article>
+    </section>
+
+    <section id="experience">
+      <h2>Experience</h2>
+
+      <div class="row">
+        <h3>Teaching assistant, Discrete Mathematics <span>· Dartmouth College</span></h3>
+        <div class="when">Sep 2026 – present</div>
+        <p>COSC 30, 60 students: office hours, review sessions, grading, and writing solutions and rubrics.</p>
+      </div>
+
+      <div class="row">
+        <h3>Actuarial &amp; machine learning intern <span>· <a href="https://ipxos.ai" target="_blank" rel="noopener">IPXos</a>, Singapore</span></h3>
+        <div class="when">Jun – Sep 2026</div>
+        <p>Life-insurance pricing models that pair GLMs with neural network corrections, validated by champion–challenger shadow tests. Built the service that explains each underwriting decision in plain English from an append-only audit record (TypeScript, PostgreSQL).</p>
+      </div>
+
+      <div class="row">
+        <h3>ML researcher &amp; software developer <span>· Evergreen AI, Dartmouth</span></h3>
+        <div class="when">Jan 2026 – present</div>
+        <p>The risk classifier, the steering experiments and Everdash, all listed above.</p>
+      </div>
+
+      <div class="row">
+        <h3>Founder &amp; president <span>· Music + Vibes = Changing Lives, Singapore</span></h3>
+        <div class="when">Jun 2024 – Jun 2026</div>
+        <p>Music therapy for more than 100 seniors and songwriting classes for more than 50 children, with over 15 partner organisations. Singapore Kindness Award, 2025.</p>
+      </div>
+
+      <div class="row">
+        <h3>Platoon sergeant <span>· Singapore Armed Forces</span></h3>
+        <div class="when">Jul 2023 – May 2025</div>
+        <p>Trained ten batches, more than 600 recruits, through basic military training.</p>
+      </div>
+
+      <div class="row">
+        <h3>Economics tutor <span>· MathVision, Singapore</span></h3>
+        <div class="when">Apr – Jun 2023</div>
+        <p>IB, AP and A-Level economics for 115 students over 300 teaching hours.</p>
       </div>
     </section>
 
-    <section>
-      <div class="sec-label">Coursework</div>
-      <div class="course-top">
-        <span class="gpa-pill"><span class="gpa-k">GPA</span> <span class="gpa-v">3.93</span> <span class="gpa-d">/ 4.0</span></span>
-        <span class="course-note">Citation = awarded to the top of the class</span>
-      </div>
-      <div class="course-grid hero-row">
-        <div class="course cited reveal">
-          <div class="code">QSS 045</div>
-          <div class="cname">AI and Machine Learning</div>
-          <span class="badge-citation">Citation</span>
-        </div>
-        <div class="course cited reveal">
-          <div class="code">QSS 020</div>
-          <div class="cname">Modern Statistical Computing</div>
-          <span class="badge-citation">Citation</span>
-        </div>
-        <div class="course cited reveal">
-          <div class="code">QSS 019</div>
-          <div class="cname">Advanced Data Visualization</div>
-          <span class="badge-citation">Citation</span>
-        </div>
-      </div>
-      <div class="course-grid">
-        <div class="course reveal"><div class="code">COSC 031</div><div class="cname">Algorithms</div></div>
-        <div class="course reveal"><div class="code">COSC 030</div><div class="cname">Discrete Math for Computer Science</div></div>
-        <div class="course reveal"><div class="code">MATH 024</div><div class="cname">Linear Algebra</div></div>
-        <div class="course reveal"><div class="code">PHIL 003</div><div class="cname">Reason and Argument</div></div>
-        <div class="course reveal"><div class="code">LING 001</div><div class="cname">Introductory Linguistics</div></div>
-        <div class="course reveal"><div class="code">COLT 07.24</div><div class="cname">Utopia</div></div>
-        <div class="course reveal"><div class="code">WRIT 005</div><div class="cname">Expository Writing</div></div>
-      </div>
+    <section id="education" class="prose">
+      <h2>Education</h2>
+      <p><strong>Dartmouth College</strong>, mathematics and decision science, expected June 2029. GPA 3.93 of 4.0. Academic citations in AI and Machine Learning, Modern Statistical Computing, and Advanced Data Visualization.</p>
+      <p>Courses: algorithms, discrete mathematics, linear algebra, econometrics, game theory, formal logic, linguistics, theories of consciousness.</p>
+      <p>President of the chess club; triathlon team.</p>
+      <p><strong>DPS International School</strong>, Singapore, 2022. Valedictorian.</p>
     </section>
 
-    <section>
-      <div class="sec-label">Tools</div>
-      <div class="tags reveal">
-        <span class="tag">Python</span><span class="tag">R</span><span class="tag">JavaScript</span>
-        <span class="tag">Flask</span><span class="tag">HTML / CSS</span><span class="tag">LaTeX</span>
-        <span class="tag">Machine learning</span><span class="tag">Statistics</span><span class="tag">Data viz</span>
-      </div>
-    </section>
+    <footer>Last updated November 2026.</footer>
 
-    <footer>
-      <div class="footlinks">
-        <a href="mailto:ansh.p.oswal.29@dartmouth.edu">Email</a>
-        <a href="https://www.linkedin.com/in/ansh-pritam-oswal" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="https://github.com/anshposwal29" target="_blank" rel="noopener">GitHub</a>
-        <a href="projects.html">Projects</a>
-      </div>
-      <div>© <span id="yr"></span> Ansh Pritam Oswal</div>
-    </footer>
   </main>
-
-  <script>
-    document.getElementById('yr').textContent = new Date().getFullYear();
-    const io = new IntersectionObserver((es)=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold:0.1 });
-    document.querySelectorAll('.reveal').forEach((el,i)=>{ el.style.transitionDelay=(Math.min(i,5)*0.05)+'s'; io.observe(el); });
-  </script>
+</div>
 </body>
 </html>

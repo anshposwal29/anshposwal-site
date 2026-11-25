@@ -15,3 +15,6 @@ Ansh_Oswal.vcf
 node_modules/
 .vercel
 .env*
+
+# Internal working notes
+SYNC_PROMPT.md
