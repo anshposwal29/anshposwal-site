@@ -499,3 +499,5 @@ footer { padding-bottom: 86px; }
 
 .courselist li span { display: block; }
 .courselist li span i { display: inline; }
+
+.withfig.gap.first { margin-top: 0; }
