@@ -1,7 +1,0 @@
-<!doctype html><meta charset="utf-8"><title>Phone preview</title>
-<style>body{margin:0;background:#888;display:flex;gap:16px;padding:16px;align-items:flex-start}iframe{width:390px;height:760px;border:0;background:#fff;flex:none}</style>
-<iframe id="a" src="/"></iframe><iframe id="b" src="/"></iframe><iframe id="c" src="/"></iframe>
-<script>
-var q=new URLSearchParams(location.search), ys=(q.get('y')||'0,760,1520').split(',');
-['a','b','c'].forEach(function(id,i){var f=document.getElementById(id);f.onload=function(){setTimeout(function(){f.contentWindow.scrollTo(0,+ys[i])},800)}});
-</script>
