@@ -10,7 +10,9 @@ Three rules the page follows:
 
 1. **Every entry has something to look at.** In order of preference: a real figure from the work, a photo of it happening, two or three headline numbers, a line quoted from the paper.
 2. **Every image must be readable at the size it is shown.** A first-page thumbnail of a PDF is not readable, so it is not used. Wide multi-panel figures are cropped to the few panels that can be read (the markets chart shows 4 of 10 panels; the poster shows one finding).
-3. **Every entry has a proof link, or says it is in preparation.** Work without a public artefact sits in the dashed "in preparation" cards and carries no link.
+3. **Every entry has a proof link, or says it is in preparation.** Work without a public artefact sits in the "In the works" dropdown and carries no link.
+4. **No tag clouds or stat cards.** Facts are written as plain sentences in ruled rows.
+5. **It must work on a phone.** Charts scroll sideways on small screens instead of shrinking until unreadable.
 
 ## Pages
 
@@ -19,17 +21,16 @@ Three rules the page follows:
 | `/` | `index.html` | The site: research, papers, project, experience, photos |
 | `/card` | `card.html` | Digital contact card with "Add to Contacts"; opens in its own tab |
 | `/home` | (redirect) | Old address, redirects to `/` (see `vercel.json`) |
-| `/projects` | `projects.html` | The older editable projects page. No longer linked from the site |
+| `/projects` | (redirect) | The old projects page was removed; redirects to `/` |
 
 ## Files
 
 - `index.html`: all content, in page order. One long file, no templates.
 - `site.css`: all styles for `index.html`. Colours and fonts are variables at the top.
-- `card.html`: self-contained (inline styles and the vCard).
+- `card.html`: self-contained (inline styles and the vCard), in the same colours and fonts as the site.
 - `assets/papers/`: the PDFs that the page links to.
 - `assets/img/`: figures (`fig-*.png/jpg`) and photos.
 - `assets_photos/`: original photos. Not committed.
-- `api/`, `projects-data.js`, `style.css`, `projects.html`: the older projects page and its Vercel Blob backend.
 
 ## Sections of `index.html` and the block each one uses
 
@@ -38,12 +39,13 @@ Three rules the page follows:
 | Research, lead item | `article.feature` | The one piece of work to lead with: photo, title, link chips, then a full-width figure |
 | Research | `article.withfig` | Figure on one side, text on the other. Add `flip` to swap sides |
 | Research | `.nums` inside `withfig` | Work with no figure: three headline numbers instead |
-| Research | `article.work` | In preparation, in progress, or earlier work with no public artefact |
+| Research | `details.more` | Dropdowns for work in progress and earlier work with no public artefact |
 | Papers | `article.withfig` | A paper that has a figure |
 | Papers | `a.book` | A paper with no figure: a coloured card with one quoted line (`.sheet.t1` to `.t5` set the colour) |
 | Project | `.project` | One project: text beside a cropped figure |
 | Experience | `ul.xp li` | One row per role: title, organisation, dates |
-| Experience | `.stats`, `.facts` | Three big numbers, then cards of short tags |
+| Experience | `.army` | Text beside photos for one role |
+| Education | `dl.ledger` | Ruled rows: a label on the left, a plain sentence on the right. Coursework is a `ul.courselist` |
 | Outside | `.photos figure` | Photos, with an optional caption pill |
 
 Links inside an entry go in `<div class="chips">`. The main proof link gets `class="main"` (green); the rest are outlined.

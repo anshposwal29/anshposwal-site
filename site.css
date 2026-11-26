@@ -1,5 +1,4 @@
-/* Home page (index.html). The contact card (card.html) carries its own inline styles;
-   projects.html still uses style.css. */
+/* Home page (index.html). The contact card (card.html) carries its own inline styles. */
 
 :root {
   --bg: #f3f0e8;
@@ -307,3 +306,143 @@ footer small { display: block; margin-top: 64px; font-size: 14px; color: #a9bfb2
 }
 .photos.army figure:nth-child(1) img { object-position: 35% 28%; }
 .photos.army figure:nth-child(2) img { object-position: center 70%; }
+
+/* ---------- dropdowns for in-progress and earlier work ---------- */
+
+.more { margin-top: 24px; border-top: 1.5px solid var(--ink); }
+.more + .more { margin-top: 0; border-top: 1px solid var(--line); }
+.more:last-of-type { border-bottom: 1px solid var(--line); }
+.more summary { list-style: none; cursor: pointer; display: flex; align-items: baseline; gap: 16px; padding: 20px 0; }
+.more summary::-webkit-details-marker { display: none; }
+.more summary span { font-family: var(--display); font-size: 30px; line-height: 1.1; }
+.more summary em { font-style: normal; font-size: 15px; color: var(--muted); flex: 1; }
+.more summary::after { content: "+"; font-size: 28px; line-height: 1; color: var(--green); }
+.more[open] summary::after { content: "–"; }
+.more ul { list-style: none; padding: 0 0 22px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.more li b { display: block; font-family: var(--display); font-weight: 400; font-size: 23px; line-height: 1.15; margin-bottom: 6px; }
+.more li span { font-size: 15.5px; color: var(--soft); }
+
+/* ---------- coursework ---------- */
+
+.courses { background: var(--card); border-radius: 22px; padding: 28px 28px 24px; margin-top: 24px; }
+.courses h3 { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1.1; }
+.courses ul { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px; }
+.courses li { background: var(--bg); border-radius: 14px; padding: 12px 14px 13px; font-size: 15.5px; line-height: 1.3; position: relative; }
+.courses li b { display: block; font-size: 12.5px; font-weight: 600; letter-spacing: .06em; color: var(--muted); margin-bottom: 3px; }
+.courses li.cited { background: var(--green-deep); color: #f3f0e8; }
+.courses li.cited b { color: #9fd8ba; }
+.courses li i { position: absolute; top: 11px; right: 12px; font-style: normal; font-size: 11.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; background: #9fd8ba; color: var(--green-deep); padding: 2px 8px; border-radius: 999px; }
+.courses p { font-size: 14px; color: var(--muted); margin-top: 14px; }
+
+/* ---------- photo rows ---------- */
+
+.photos.sport { grid-template-columns: 1fr 1.6fr 1fr; margin-bottom: 24px; }
+.photos.sport figure:nth-child(1) img { object-position: center 22%; }
+.photos.sport figure:nth-child(2) img { object-position: center 45%; }
+.photos.sport figure:nth-child(3) img { object-position: center 30%; }
+.photos.awards { grid-template-columns: 1fr 1.5fr 1.5fr; }
+.photos.awards figure:nth-child(1) img { object-position: center 20%; }
+.photos.awards figure:nth-child(2) img { object-position: 70% 30%; }
+
+/* ---------- phones ---------- */
+
+@media (max-width: 960px) {
+  .more ul { grid-template-columns: 1fr; gap: 16px; }
+  .more summary span { font-size: 26px; }
+  .courses ul { grid-template-columns: 1fr 1fr; }
+  .photos.sport, .photos.awards { grid-template-columns: 1fr 1fr; }
+  .photos.sport figure, .photos.awards figure, .photos.army figure { height: 250px; grid-column: auto; grid-row: auto; }
+  .photos.sport figure:nth-child(2), .photos.awards figure:nth-child(2) { grid-column: 1 / -1; grid-row: auto; height: 230px; }
+  .photos.awards figure:nth-child(3) { grid-column: 1 / -1; height: 220px; }
+  .photos.army figure:nth-child(3) { grid-column: 1 / -1; height: 190px; }
+}
+
+@media (max-width: 640px) {
+  .wrap { padding: 0 18px; }
+  .bar .mark { font-size: 21px; }
+  .pill { padding: 8px 14px; font-size: 14px; }
+  h1 { font-size: 19vw; margin: 16px 0 22px; }
+  .hero .actions { margin-top: 22px; }
+  .collage { padding-bottom: 44px; }
+  .collage .portrait { width: 88%; }
+  .collage figure { width: 60%; border-width: 4px; }
+  section { padding: 44px 0; }
+  h2 { font-size: 46px; }
+  .feature, .withfig, .tile { border-radius: 20px; }
+  .feature h3 { font-size: 32px; }
+  .withfig h3 { font-size: 28px; }
+  .project h3 { font-size: 32px; }
+  /* charts stay readable: scroll sideways instead of shrinking */
+  .feature .fig, .withfig .figbox, .project .poster { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .feature .fig img { width: 760px; max-width: none; }
+  .withfig .figbox { display: block; }
+  .withfig .figbox img { width: 520px; max-width: none; }
+  .project .poster img { width: 640px; max-width: none; }
+  .project .poster .cap { display: block; }
+  .nums b { font-size: 46px; }
+  .nums span { font-size: 13px; }
+  .nums div { padding: 22px 12px; }
+  .shelf { grid-template-columns: 1fr; gap: 28px; }
+  .book .sheet { aspect-ratio: auto; min-height: 190px; padding: 24px; }
+  .book q { font-size: 28px; }
+  .xp .role { font-size: 23px; }
+  .stat b { font-size: 60px; }
+  .courses { padding: 22px 18px 20px; }
+  .courses ul { grid-template-columns: 1fr; }
+  .fact { padding: 22px 20px 24px; }
+  .photos.sport figure, .photos.awards figure, .photos.army figure { height: 210px; }
+  .photos figcaption { font-size: 12px; left: 10px; bottom: 10px; }
+  footer { padding: 60px 0 32px; }
+  footer h2 { font-size: 21vw; }
+  footer .pill { font-size: 14px; }
+}
+
+/* ---------- army block: text, parade, trophy, hall of fame ---------- */
+
+.army { display: grid; grid-template-columns: 1.15fr 0.8fr 1.2fr 1.2fr; gap: 24px; margin-top: 24px; }
+.army-text { background: var(--card); border-radius: 22px; padding: 26px 28px 28px; }
+.army-text h3 { font-family: var(--display); font-weight: 400; font-size: 28px; line-height: 1.1; }
+.army-text p { font-size: 15.5px; color: var(--soft); margin-top: 8px; }
+.army-text ul { list-style: none; display: flex; flex-wrap: wrap; gap: 7px; margin-top: 16px; }
+.army-text li { font-size: 14px; padding: 4px 11px; border-radius: 999px; background: var(--bg); }
+.army figure { position: relative; border-radius: 22px; overflow: hidden; min-height: 320px; }
+.army figure img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.army figure:nth-of-type(1) img { object-position: 35% 28%; }
+.army figure:nth-of-type(2) img { object-position: center 70%; }
+.army figure.board { background: #b08408; }
+.army figure.board img { object-fit: contain; }
+.army figcaption { position: absolute; left: 14px; bottom: 14px; font-size: 13px; font-weight: 600; background: rgba(18, 19, 17, .78); color: #fff; padding: 5px 12px; border-radius: 999px; }
+.facts .fact:last-child:nth-child(3n + 2) { grid-column: span 2; }
+@media (max-width: 960px) {
+  .army { grid-template-columns: 1fr 1fr; }
+  .army-text { grid-column: 1 / -1; }
+  .army figure { min-height: 240px; }
+  .army figure.board { grid-column: 1 / -1; min-height: 190px; }
+  .facts .fact:last-child:nth-child(3n + 2) { grid-column: auto; }
+}
+
+/* ---------- education ledger: ruled rows, no cards ---------- */
+
+.ledger { border-top: 1.5px solid var(--ink); }
+.ledger > div { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; padding: 22px 0; border-bottom: 1px solid var(--line); }
+.ledger dt { font-family: var(--display); font-size: 28px; line-height: 1.1; }
+.ledger dd { color: var(--soft); max-width: 68ch; }
+.ledger dd strong { color: var(--ink); font-weight: 600; }
+.courselist { list-style: none; columns: 2; column-gap: 40px; max-width: none; }
+.courselist li { break-inside: avoid; padding: 3px 0; }
+.courselist b { display: inline-block; min-width: 86px; font-size: 13px; font-weight: 600; letter-spacing: .05em; color: var(--muted); }
+.courselist i { font-style: normal; font-size: 13px; font-weight: 600; color: var(--green); margin-left: 6px; white-space: nowrap; }
+.courselist i::before { content: "· "; }
+
+.army-text { background: none; padding: 4px 0 0; border-radius: 0; }
+.army-text h3 { font-size: 34px; }
+.army-text p { font-size: 16.5px; margin-top: 12px; }
+
+@media (max-width: 960px) {
+  .ledger > div { grid-template-columns: 1fr; gap: 6px; padding: 18px 0; }
+  .ledger dt { font-size: 25px; }
+}
+@media (max-width: 640px) {
+  .courselist { columns: 1; }
+  .courselist b { min-width: 92px; }
+}
