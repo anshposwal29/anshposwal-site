@@ -305,3 +305,5 @@ footer small { display: block; margin-top: 64px; font-size: 14px; color: #a9bfb2
   .photos.army figure:nth-child(2), .photos.four figure:nth-child(2) { grid-column: auto; grid-row: auto; height: 260px; }
   .photos.army figure:nth-child(3) { grid-column: 1 / -1; height: 200px; }
 }
+.photos.army figure:nth-child(1) img { object-position: 35% 28%; }
+.photos.army figure:nth-child(2) img { object-position: center 70%; }
