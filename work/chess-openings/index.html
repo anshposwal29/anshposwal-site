@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chess Openings Scrollytelling</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="data.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: #1a1a1a; 
+            color: white; 
+            margin: 0; 
+            height: 1000vh; 
+            overflow-x: hidden; 
+            overflow-y: auto; 
+        }
+        
+        #chart { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; opacity: 0;}
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+        
+        /* --- PROLOGUE UI (TOP BOX) --- */
+        #prologue-ui {
+            position: fixed;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 16px;
+            border: 1px solid #333;
+            pointer-events: none;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            width: 550px;
+            padding: 30px 40px;
+            box-sizing: border-box;
+            text-align: center;
+            opacity: 0; /* Managed by JS */
+        }
+
+        #prologue-text {
+            font-family: 'Lora', Georgia, serif;
+            font-size: 20px;
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin: 0 0 15px 0; /* Bottom margin for the scroll hint */
+        }
+
+        /* --- MAIN ERA UI (CENTER BOX) --- */
+        #ui-layer { 
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            z-index: 10; 
+            background: rgba(0, 0, 0, 0.85); 
+            border-radius: 16px; 
+            border: 1px solid #333; 
+            pointer-events: none; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+            width: 550px; 
+            height: 280px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0 40px;
+            box-sizing: border-box;
+            opacity: 0;
+        }
+
+        /* --- LEGEND STYLES --- */
+        #size-legend {
+            position: fixed;
+            bottom: 80px;
+            right: 40px;
+            background: rgba(0, 0, 0, 0.75);
+            border: 1px solid #444;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 10;
+            opacity: 0; /* Hidden initially */
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .legend-title { font-size: 11px; color: #888; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;}
+        .legend-item { display: flex; align-items: center; margin-bottom: 10px; font-size: 13px; color: #ccc; }
+        .legend-item:last-child { margin-bottom: 0; }
+        .legend-circle { border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid #ccc; margin-right: 15px; }
+        .legend-circle.small { width: 6px; height: 6px; }
+        .legend-circle.medium { width: 16px; height: 16px; }
+        .legend-circle.large { width: 34px; height: 34px; }
+
+        
+        #era-display { position: absolute; font-size: 36px; color: #27ae60; font-weight: 800; margin: 0; width: 100%; text-align: center; text-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); }
+        #story-text { position: absolute; font-family: 'Lora', Georgia, serif; font-size: 19px; color: #ddd; line-height: 1.6; margin: 0; width: 85%; text-align: center; }
+        .scroll-hint { font-family: 'Inter', sans-serif; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 2px; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); white-space: nowrap;}
+
+        /* --- D3 & TIMELINE STYLES --- */
+        .node circle { stroke: #111; stroke-width: 1px; transition: r 0.8s ease-in-out; cursor: grab; pointer-events: all; }
+        .node circle:active { cursor: grabbing; }
+        .node text { font-size: 11px; pointer-events: none; fill: #fff; transition: opacity 0.5s; text-shadow: 1px 1px 2px black, -1px -1px 2px black; }
+        .link { fill: none; stroke: #555; transition: stroke-width 0.8s ease-out, opacity 0.8s; }
+        
+        #tooltip { position: absolute; opacity: 0; background: rgba(0,0,0,0.9); border: 1px solid #555; color: white; padding: 12px; border-radius: 6px; pointer-events: none; transition: 0.1s; font-size: 14px; z-index: 20; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+
+        #timeline-container { position: fixed; bottom: 0; left: 0; width: 100vw; height: 12px; background: #222; z-index: 15; border-top: 1px solid #444; opacity: 0; transition: opacity 0.5s;}
+        #timeline-progress { height: 100%; background: #27ae60; width: 0%; }
+        .timeline-marker { position: absolute; top: -30px; color: #666; font-size: 11px; white-space: nowrap; transition: color 0.3s, font-weight 0.3s; pointer-events: none; }
+        .timeline-marker.active { color: #fff; font-weight: bold; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+        .timeline-tick { position: absolute; bottom: 12px; transform: translateX(-50%); width: 2px; height: 10px; background: #444; }
+    </style>
+</head>
+<body>
+    <canvas id="particle-canvas"></canvas>
+    <svg id="chart"></svg>
+    
+    <div id="prologue-ui">
+        <p id="prologue-text">Loading...</p>
+        <div class="scroll-hint">↓ Scroll Slowly ↓</div>
+    </div>
+
+    <div id="ui-layer">
+        <h2 id="era-display">Loading...</h2>
+        <p id="story-text">Loading narrative...</p>
+        <div class="scroll-hint">↓ Scroll Slowly ↓</div>
+    </div>
+    <div id="size-legend">
+        <div class="legend-title">Opening Volume</div>
+        <div class="legend-item"><div class="legend-circle small"></div><span>Rare</span></div>
+        <div class="legend-item"><div class="legend-circle medium"></div><span>Popular</span></div>
+        <div class="legend-item"><div class="legend-circle large"></div><span>Dominant</span></div>
+    </div>
+    <div id="tooltip"></div>
+    
+    <div id="timeline-container">
+        <div id="timeline-progress"></div>
+    </div>
+
+    <script>
+        let currentEra = eras[0];
+        let currentEraIndex = 0;
+        let clickedNode = null;
+        const totalEras = eras.length;
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        
+        const stories = [
+            "Look at the overwhelming sea of <span style='color: #f1c40f; font-weight: 600;'>Gold</span>. Before 1972, chess was highly classical. A massive 62% of games were played in the <span style='color: #f39c12; font-weight: 600;'>Central</span> group—primarily the Queen's Gambit and Open Games. Players fought strictly and directly for control of the middle of the board.",
+            "Enter Kasparov and the era of asymmetrical warfare. Notice the <span style='color: #e74c3c; font-weight: 600;'>aggressive Crimson</span> bubbles—the Sicilian and King's Indian Defenses—surging forward. Players began dodging classical symmetry, opting instead for sharp, <span style='color: #a93226; font-weight: 600;'>combative</span> fights.",
+            "In the early engine era, the <span style='color: #e74c3c; font-weight: 600;'>Combative</span> openings hit their absolute peak, taking up nearly 40% of the map. The Sicilian Defense alone is a massive anchor. The map is sprawling and deeply theoretical, with opening preparation stretching past move 20, that's 40 total moves!",
+            "The AlphaZero Effect. Notice the sudden explosion of <span style='color: #00d2d3; font-weight: 600;'>Electric Blue</span>. In the modern era, heavily analyzed classical and combative lines often lead to forced draws. Today's top grandmasters pivot to 'Modern Pragmatism'—<span style='color: #0abde3; font-weight: 600;'>flexible and creative</span> Flank Openings and Grünfelds that dodge theory and force opponents into pure chess."
+        ];
+
+        const narrativeHighlights = [
+            ["Queen's Gambit", "Open Games (e4 e5)", "French Defence", "Dutch Defence"], 
+            ["Sicilian Defence", "King's Indian Defence", "Nimzo / Queen's Indian / Catalan"], 
+            ["Sicilian Defence", "King's Indian Defence", "Nimzo / Queen's Indian / Catalan"], 
+            ["Flank Openings", "Grünfeld / Closed Games", "Semi-Open Games"]  
+        ];
+
+        const colorMap = {
+            "Queen's Gambit": "#f1c40f", "Open Games (e4 e5)": "#f39c12", "French Defence": "#e67e22", "Dutch Defence": "#d35400",
+            "Sicilian Defence": "#e74c3c", "Nimzo / Queen's Indian / Catalan": "#c0392b", "King's Indian Defence": "#a93226",
+            "Flank Openings": "#00d2d3", "Grünfeld / Closed Games": "#0abde3", "Semi-Open Games": "#48dbfb", "Other": "#555555"
+        };
+        const colorScale = (category) => colorMap[category] || "#555555";
+
+        // --- 1. PROLOGUE: STRICT BOUNDARY PARTICLE ENGINE WITH ZOOM ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let greyParticles = [], gmParticles = [], eliteParticle = null;
+
+        function initParticles() {
+            canvas.width = width; canvas.height = height;
+            greyParticles = []; gmParticles = [];
+            for(let i=0; i<25000; i++) greyParticles.push({ startX: Math.random() * width, startY: Math.random() * -height * 1.5, endY: (height * 0.2) + Math.random() * (height * 0.45), noiseOffset: Math.random() * Math.PI * 2 });
+            for(let i=0; i<5; i++) gmParticles.push({ startX: Math.random() * width, startY: Math.random() * -height, endY: (height * 0.65) + Math.random() * (height * 0.15), noiseOffset: Math.random() * Math.PI * 2 });
+            eliteParticle = { startX: width/2, startY: -200, endY: height * 0.85, noiseOffset: 0 };
+        }
+        initParticles();
+        window.addEventListener('resize', () => { width = window.innerWidth; height = window.innerHeight; initParticles(); });
+
+        function getFunnelEdges(y, w, h) {
+            const Y1 = h * 0.2, Y2 = h * 0.65, Y3 = h * 0.8;
+            if (y <= Y1) return { l: 0, r: w }; 
+            if (y <= Y2) { let p = (y - Y1) / (Y2 - Y1); return { l: p * (w/2 - 100), r: w - p * (w/2 - 100) }; }
+            if (y <= Y3) { let p = (y - Y2) / (Y3 - Y2); return { l: (w/2 - 100) + p * 80, r: (w/2 + 100) - p * 80 }; }
+            return { l: w/2 - 20, r: w/2 + 20 }; 
+        }
+
+        function drawFunnel(p) {
+            ctx.clearRect(0, 0, width, height);
+
+            ctx.save();
+            // ZOOM EFFECT: Scales up to 3x as p approaches 1, centering on the bottleneck
+            let scale = 1 + Math.pow(p, 2) * 2; 
+            let focalX = width / 2;
+            let focalY = height * 0.8; 
+            
+            ctx.translate(focalX, focalY);
+            ctx.scale(scale, scale);
+            ctx.translate(-focalX, -focalY);
+
+            ctx.strokeStyle = `rgba(255, 255, 255, ${Math.min(p * 1.5, 0.15)})`;
+            ctx.lineWidth = 1 / scale; // Keep lines thin while zoomed
+            ctx.beginPath();
+            ctx.moveTo(0, height*0.2); ctx.lineTo(width/2 - 100, height*0.65); ctx.moveTo(width, height*0.2); ctx.lineTo(width/2 + 100, height*0.65);
+            ctx.moveTo(width/2 - 100, height*0.65); ctx.lineTo(width/2 - 20, height*0.8); ctx.moveTo(width/2 + 100, height*0.65); ctx.lineTo(width/2 + 20, height*0.8);
+            ctx.stroke();
+
+            // Grey Particles
+            let myProgressGrey = Math.min(1, p / 0.5);
+            let easePGrey = myProgressGrey < 0.5 ? 2 * myProgressGrey * myProgressGrey : 1 - Math.pow(-2 * myProgressGrey + 2, 2) / 2;
+            let greyAlpha = Math.max(0.05, 0.8 - (p * 0.9)); 
+            ctx.fillStyle = `rgba(220, 220, 220, ${greyAlpha})`;; ctx.beginPath();
+            for (let i = 0; i < greyParticles.length; i++) {
+                let pt = greyParticles[i]; let currY = pt.startY + (pt.endY - pt.startY) * easePGrey; let currX = pt.startX;
+                if (myProgressGrey < 1) currX += Math.sin(p * 20 + pt.noiseOffset) * 10 * (1 - easePGrey);
+                let edges = getFunnelEdges(currY, width, height);
+                if (currX < edges.l + 1) currX = edges.l + 1; if (currX > edges.r - 1) currX = edges.r - 1;
+                ctx.rect(currX, currY, 1.5, 1.5); 
+            }
+            ctx.fill();
+
+            // GM Particles (Now Yellow)
+            let myProgressGM = Math.min(1, p / 0.75);
+            let easePGM = myProgressGM < 0.5 ? 2 * myProgressGM * myProgressGM : 1 - Math.pow(-2 * myProgressGM + 2, 2) / 2;
+            ctx.fillStyle = '#f1c40f'; // Yellow
+            ctx.beginPath();
+            for (let i = 0; i < gmParticles.length; i++) {
+                let pt = gmParticles[i]; let currY = pt.startY + (pt.endY - pt.startY) * easePGM; let currX = pt.startX;
+                if (myProgressGM < 1) currX += Math.sin(p * 20 + pt.noiseOffset) * 15 * (1 - easePGM);
+                let edges = getFunnelEdges(currY, width, height);
+                if (currX < edges.l + 2.5) currX = edges.l + 2.5; if (currX > edges.r - 2.5) currX = edges.r - 2.5;
+                ctx.moveTo(currX, currY); ctx.arc(currX, currY, 2.5, 0, Math.PI * 2);
+            }
+            ctx.fill();
+
+            // Elite Particle (Now Green)
+            let myProgressElite = Math.min(1, p / 0.9);
+            let easePElite = myProgressElite < 0.5 ? 2 * myProgressElite * myProgressElite : 1 - Math.pow(-2 * myProgressElite + 2, 2) / 2;
+            let currY = eliteParticle.startY + (eliteParticle.endY - eliteParticle.startY) * easePElite; let currX = eliteParticle.startX;
+            let radius = 4; 
+            ctx.fillStyle = '#27ae60'; // Green
+            
+            if (p > 0.9) {
+                let rippleP = (p - 0.9) / 0.1; 
+                // Adjust expansion for the canvas scale so it fills the screen properly
+                radius = 4 + (rippleP * Math.max(width, height) / scale); 
+                ctx.fillStyle = `rgba(39, 174, 96, ${1 - Math.pow(rippleP, 0.5)})`; 
+            }
+            ctx.beginPath(); ctx.arc(currX, currY, radius, 0, Math.PI * 2); ctx.fill();
+
+            ctx.restore();
+        }
+
+        // --- 2. D3 NETWORK GRAPH ---
+        graphData.nodes.forEach(n => { n.x = width/2; n.y = height / 2; });
+
+        const zoom = d3.zoom().on("zoom", (event) => g.attr("transform", event.transform));
+        const svg = d3.select("#chart").call(zoom).on("wheel.zoom", null).append("g");
+        const g = svg.append("g");
+
+        const simulation = d3.forceSimulation(graphData.nodes)
+            .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(d => d.target.level === 1 ? 80 : 25))
+            .force("charge", d3.forceManyBody().strength(d => d.level === 0 ? -300 : (d.level === 1 ? -60 : -20)))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("x", d3.forceX(width / 2).strength(0.05))
+            .force("y", d3.forceY(height / 2).strength(0.05))
+            .force("collide", d3.forceCollide().radius(d => getRadius(d, currentEra) + 2).iterations(4));
+
+        const link = g.append("g").selectAll("path").data(graphData.links).join("path").attr("class", "link");
+        const node = g.append("g").selectAll("g").data(graphData.nodes).join("g").attr("class", "node")
+            .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+
+        const circles = node.append("circle")
+            .attr("fill", d => d.level === 0 ? "#555" : colorScale(d.category))
+            .on("mouseover", function(event, d) {
+                if (clickedNode && clickedNode !== d) return;
+                const count = d.counts[currentEra] || 0; const total = eraTotals[currentEra] || 1; const pct = ((count / total) * 100).toFixed(1);
+                if(count === 0 && d.level !== 0) return; 
+                d3.select("#tooltip").style("opacity", 1).html(`<strong>${d.id}</strong><br><span style="color:#aaa; font-size:12px;">${d.category}</span><br><br>${pct}% of games`).style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 15) + "px");
+                d3.select(this).attr("stroke", "#fff").attr("stroke-width", 2);
+            })
+            .on("mouseout", function(event, d) {
+                if (clickedNode === d || (clickedNode && clickedNode !== d)) return;
+                d3.select("#tooltip").style("opacity", 0); d3.select(this).attr("stroke", "#111").attr("stroke-width", 1);
+            })
+            .on("click", function(event, d) {
+                event.stopPropagation();
+                if (clickedNode === d) {
+                    clickedNode = null; circles.attr("stroke", "#111").attr("stroke-width", 1); d3.select("#tooltip").style("opacity", 0);
+                } else {
+                    if (clickedNode) circles.attr("stroke", "#111").attr("stroke-width", 1);
+                    clickedNode = d; d3.select(this).attr("stroke", "#fff").attr("stroke-width", 2);
+                    const pct = (((d.counts[currentEra] || 0) / (eraTotals[currentEra] || 1)) * 100).toFixed(1);
+                    d3.select("#tooltip").style("opacity", 1).html(`<strong>${d.id}</strong><br><span style="color:#aaa; font-size:12px;">${d.category}</span><br><br>${pct}% of games`).style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 15) + "px");
+                }
+                updateNodeLinkStyles();
+            });
+
+        d3.select("#chart").on("click", function(event) {
+            if (event.target.tagName === "svg" || event.target.tagName === "g") {
+                clickedNode = null; circles.attr("stroke", "#111").attr("stroke-width", 1); d3.select("#tooltip").style("opacity", 0); updateNodeLinkStyles();
+            }
+        });
+
+        const labels = node.append("text").attr("dx", 0).attr("dy", d => d.level === 1 ? -15 : 4).attr("text-anchor", "middle").text(d => d.level === 1 ? d.id : (d.level === 0 ? "All Games" : "")); 
+
+        function getRadius(d, era) {
+            if (d.level === 0) return 6; 
+            const count = d.counts[era] || 0; const total = eraTotals[era] || 1; const pct = (count / total) * 100;
+            return pct > 0 ? Math.max(3, Math.sqrt(pct) * 12) : 0; 
+        }
+
+        simulation.on("tick", () => {
+            link.attr("d", d => {
+                const dx = d.target.x - d.source.x, dy = d.target.y - d.source.y, dr = Math.sqrt(dx * dx + dy * dy) * 1.5; 
+                return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+            });
+            node.attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+
+        function updateNodeLinkStyles() {
+            const activeHighlights = narrativeHighlights[currentEraIndex] || [];
+            circles.style("opacity", function(n) {
+                if ((n.counts[currentEra] || 0) === 0 && n.level !== 0) return 0; 
+                if (clickedNode) {
+                    const isConnected = graphData.links.some(l => (l.source.id === clickedNode.id && l.target.id === n.id) || (l.target.id === clickedNode.id && l.source.id === n.id));
+                    return (n.id === clickedNode.id || isConnected || n.level === 0) ? 1 : 0.05;
+                }
+                return (n.level === 0 || activeHighlights.includes(n.category)) ? 1 : 0.15;
+            });
+            link.style("opacity", function(l) {
+                if ((l.target.counts[currentEra] || 0) === 0) return 0;
+                if (clickedNode) return (l.source.id === clickedNode.id || l.target.id === clickedNode.id) ? 0.8 : 0;
+                return activeHighlights.includes(l.target.category) ? 0.4 : 0.05;
+            });
+            labels.style("opacity", function(n) {
+                if (clickedNode) return (n.id === clickedNode.id) ? 1 : 0.05;
+                return (activeHighlights.includes(n.category) || n.level === 0) ? 1 : 0.15;
+            });
+        }
+
+        // --- 3. SCROLLING AND TIMELINE ---
+        const timelineContainer = d3.select("#timeline-container");
+        eras.forEach((era, i) => {
+            const markerPct = ((i + 0.5) / totalEras) * 100;
+            timelineContainer.append("div").attr("class", "timeline-marker").attr("id", `marker-${i}`).style("left", `${markerPct}%`).style("transform", "translateX(-50%)").text(era);
+            if (i < totalEras - 1) {
+                const tickPct = ((i + 1) / totalEras) * 100;
+                timelineContainer.append("div").attr("class", "timeline-tick").style("left", `${tickPct}%`);
+            }
+        });
+
+        function updateEra(era, index) {
+            currentEra = era; currentEraIndex = index;
+            d3.select("#era-display").text(era);
+            d3.select("#story-text").html(stories[index] || "");
+            d3.selectAll(".timeline-marker").classed("active", false); d3.select(`#marker-${index}`).classed("active", true);
+
+            circles.attr("r", d => getRadius(d, era));
+            link.attr("stroke-width", d => {
+                const count = d.target.counts[era] || 0; const pct = (count / eraTotals[era]) * 100;
+                return pct > 0 ? Math.max(0.5, Math.sqrt(pct) * 1.5) : 0;
+            });
+            
+            updateNodeLinkStyles();
+            simulation.force("collide", d3.forceCollide().radius(d => getRadius(d, era) + 2).iterations(4));
+            simulation.alpha(0.6).restart();
+        }
+
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const maxScroll = document.body.scrollHeight - window.innerHeight;
+            let progress = maxScroll > 0 ? scrollY / maxScroll : 0;
+            progress = Math.max(0, Math.min(1, progress)); 
+
+            const prologueUI = d3.select("#prologue-ui");
+            const prologueText = d3.select("#prologue-text");
+            const uiLayer = d3.select("#ui-layer");
+
+            // PROLOGUE (0% to 20% scroll)
+            if (progress < 0.20) {
+                let p = progress / 0.20; 
+                drawFunnel(p);
+                
+                canvas.style.opacity = 1; 
+                d3.select("#chart").style("opacity", 0); 
+                d3.select("#timeline-container").style("opacity", 0);
+                
+                // Show the Top Box, hide the Center Box
+                prologueUI.style("opacity", 1);
+                uiLayer.style("opacity", 0); 
+
+                if (p < 0.35) {
+                    prologueText.text("Welcome to the world of Chess! There are over 100 million active chess players worldwide.");
+                } else if (p < 0.70) {
+                    prologueText.text("But the path to mastery is a brutal filter. Only 2,157 players, marked in yellow currently hold the title of Grandmaster.");
+                } else {
+                    prologueText.text("But the best of the best? The World Championship contenders. A single, exclusive green drop of history's absolute elite.");
+                }
+                d3.select("#size-legend").style("opacity", 0);
+            } 
+            // MAIN STORY ERAS (20% to 100% scroll)
+            else {
+                canvas.style.opacity = 0; 
+                d3.select("#chart").style("opacity", 1); 
+                d3.select("#timeline-container").style("opacity", 1);
+                
+                // Hide the Top Box
+                prologueUI.style("opacity", 0);
+
+                let eraProgress = (progress - 0.20) / 0.80;
+                d3.select("#timeline-progress").style("width", `${eraProgress * 100}%`);
+                
+                let activeIndex = Math.floor(eraProgress * totalEras);
+                if (activeIndex >= totalEras) activeIndex = totalEras - 1; 
+                let localProgress = (eraProgress * totalEras) - activeIndex;
+                if (eraProgress >= 1) localProgress = 1;
+
+                const eraDisplay = d3.select("#era-display");
+                const storyText = d3.select("#story-text");
+
+                if (localProgress < 0.05) {
+                    uiLayer.style("opacity", localProgress * 20); eraDisplay.style("opacity", 1); storyText.style("opacity", 0);
+                } else if (localProgress < 0.25) {
+                    uiLayer.style("opacity", 1); eraDisplay.style("opacity", 1); storyText.style("opacity", 0);
+                } else if (localProgress < 0.35) {
+                    let fade = (localProgress - 0.25) * 10; uiLayer.style("opacity", 1); eraDisplay.style("opacity", 1 - fade); storyText.style("opacity", fade);
+                } else if (localProgress < 0.75) {
+                    uiLayer.style("opacity", 1); eraDisplay.style("opacity", 0); storyText.style("opacity", 1);
+                } else if (localProgress < 0.85) {
+                    let fadeOut = 1 - ((localProgress - 0.75) * 10); uiLayer.style("opacity", Math.max(0, fadeOut)); eraDisplay.style("opacity", 0); storyText.style("opacity", 1); 
+                } else {
+                    uiLayer.style("opacity", 0);
+                }
+                d3.select("#size-legend").style("opacity", 1);
+                if (currentEraIndex !== activeIndex) updateEra(eras[activeIndex], activeIndex);
+                
+            }
+        });
+
+        function dragstarted(event, d) { if (!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; }
+        function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
+        function dragended(event, d) { if (!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }
+        
+        updateEra(eras[0], 0);
+        window.dispatchEvent(new Event('scroll'));
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Theory & Human Choice</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Lora:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/scrollama"></script>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- PHASE 0: INTRO                                               -->
+<!-- ============================================================ -->
+<div id="intro-screen">
+    <div id="intro-left"></div>
+    <div id="intro-right"></div>
+    <div id="intro-content">
+        <div id="intro-eyebrow">Advanced Data Visualisation</div>
+        <h1 id="intro-title">
+            <span class="title-line-1">Game Theory</span>
+            <span class="title-line-2">&amp; Human Choice</span>
+        </h1>
+        <p id="intro-subtitle">Five decisions. Eight seconds each.<br>How rational are you, really?</p>
+        <button id="play-btn">Play</button>
+
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHASE 1: GAME                                                -->
+<!-- ============================================================ -->
+<div id="game-screen" style="display:none;">
+    <div id="timer-bar"><div id="timer-fill"></div></div>
+    <div id="question-counter-bar">
+        <span id="question-counter-text">Question 1 of 5</span>
+    </div>
+    <h2 id="question-text">Loading...</h2>
+    <div id="split-container">
+        <div id="left-choice" class="choice-half"><span id="left-text">A</span></div>
+        <div id="right-choice" class="choice-half"><span id="right-text">B</span></div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- PHASE 2: REVEAL                                           -->
+    <!-- ========================================================= -->
+    <div id="reveal-screen">
+        <div id="reveal-inner">
+
+            <div class="reveal-text sequence-1" id="reveal-headline">
+                <div id="reveal-tagline">You've been profiled.</div>
+                <p id="reveal-subline">Here's what your decisions say about you.</p>
+            </div>
+
+            <div id="arc-meters" class="reveal-text sequence-2"></div>
+
+            <div class="reveal-divider reveal-text sequence-3"></div>
+
+            <div class="reveal-section reveal-text sequence-3">
+                <div class="reveal-section-title">Your Bias Fingerprint</div>
+                <div id="bias-tags"></div>
+            </div>
+
+            <div class="reveal-section reveal-text sequence-4">
+                <div class="reveal-section-title">You vs. Everyone Else</div>
+                <div id="pop-bars-inner"></div>
+            </div>
+
+            <p id="reveal-summary" class="reveal-text sequence-5"></p>
+
+            <button id="start-scrolly-btn" class="reveal-text sequence-6">
+                Explore ↓
+            </button>
+
+        </div>
+    </div>
+
+    <div id="timeout-overlay" style="display:none;">
+        <h1>Out of Time.</h1>
+
+        <button id="reset-btn">↺ Play Again</button>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PHASE 3: SCROLLYTELLING                                      -->
+<!-- The key structural rule: scroll-text floats, sticky-thing   -->
+<!-- is position:sticky. Both are direct flex children of        -->
+<!-- #scrolly which must be display:flex, align-items:flex-start -->
+<!-- ============================================================ -->
+<div id="main-content" style="display:none;">
+
+    <section id="scrolly-intro">
+        <h1>Where Did You Fall?</h1>
+        <p>Let's map your decisions onto the same framework economists have used for 45 years to explain why humans aren't rational — and why that's completely predictable.</p>
+    </section>
+
+    <section id="scrolly">
+
+        <div class="scroll-text">
+            <div class="step" data-step="1">
+                <h2>The Value Function</h2>
+                <p>In 1979, Kahneman and Tversky proposed something radical: people don't evaluate outcomes in absolute terms. They evaluate them as <strong>gains or losses relative to a reference point</strong> — and the two sides of that curve are deeply unequal.</p>
+                <p>The right side — <span class="hl-gain">gains</span> — rises steeply, then flattens. The left — <span class="hl-loss">losses</span> — drops far more sharply. This asymmetry is the engine behind nearly every bias you have.</p>
+                <div class="step-cite">Kahneman &amp; Tversky, <em>Econometrica</em> (1979)</div>
+            </div>
+
+            <div class="step" data-step="2">
+                <h2>Your Answers on the Curve</h2>
+                <p>Your Q1 and Q2 answers are now plotted. See where you land on each side of the value function.</p>
+                <p>If you chose the sure $500 gain but gambled to avoid the sure loss — <strong>your two points sit on opposite sides of the rational midline</strong>. Same expected value. Opposite choices. That's loss aversion, live on the curve.</p>
+                <p>Losses feel roughly <strong>2× more painful</strong> than equivalent gains feel good. Not metaphorically — measurably, replicably, across 19 countries.</p>
+                <div class="step-cite">Ruggeri et al., <em>Nature Human Behaviour</em> (2020) — 19 countries, 13 languages</div>
+            </div>
+
+            <div class="step" data-step="3">
+                <h2>You're Not Alone</h2>
+                <p>900 simulated people — drawn from real research distributions — make the same five choices you just made. <strong>Irrationality isn't noise. It's structure.</strong></p>
+                <p>Your dot is gold. Find yourself in the crowd.</p>
+                <div class="step-cite">Distributions from Kahneman &amp; Tversky (1979) and Ruggeri et al. (2020)</div>
+            </div>
+
+            <div class="step" data-step="4">
+                <h2>The Clusters</h2>
+                <p>Three groups emerge: <span class="hl-rational">Rational Actors</span> — roughly 15%, they resisted every bias. <span class="hl-loss-averse">Loss Averse</span> — the largest cluster, they flipped on losses. <span class="hl-biased">Fully Biased</span> — every heuristic fired.</p>
+                <p>Your dot settles into its cluster. <em>If individuals behave this predictably, what happens when everyone has to choose together?</em></p>
+                <div class="step-cite">Ruggeri et al. (2020)</div>
+            </div>
+        </div>
+
+        <div class="sticky-thing">
+            <div id="vis-container"></div>
+        </div>
+
+    </section>
+
+    <div id="phase2-bridge">
+        <p>You've seen how you deviate. Now: what does optimal actually look like?</p>
+        <button id="enter-phase2-btn">Continue</button>
+    </div>
+
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PHASE 4: RATIONAL → OPTIMAL                                  -->
+<!-- ============================================================ -->
+<div id="phase2-content" style="display:none;">
+
+    <!-- Section A: Human → Rational -->
+    <section id="rational-intro">
+        <div class="phase-eyebrow">Part II</div>
+        <h1>From Human to Rational</h1>
+        <p>You've seen where you fall. Now let's see what optimal looks like — and where it breaks down.</p>
+    </section>
+
+    <section id="scrolly-rational" class="scrolly-section">
+        <div class="scroll-text">
+
+            <div class="step" data-section="rational" data-step="5">
+                <h2>What is Expected Value?</h2>
+                <p>A rational actor reduces every decision to a single number: <strong>Expected Value</strong>. Probability × Outcome, summed across all possibilities. No emotion, no framing, no sunk costs.</p>
+                <p>For Q1: 50% × $1,000 = <span class="hl-gain">$500</span>. For the sure $500: 100% × $500 = <span class="hl-gain">$500</span>. <strong>Identical.</strong> A rational actor is perfectly indifferent. Your brain was not.</p>
+                <div class="step-cite">von Neumann &amp; Morgenstern, <em>Theory of Games and Economic Behavior</em> (1944)</div>
+            </div>
+
+            <div class="step" data-section="rational" data-step="6">
+                <h2>The Cost of Your Biases</h2>
+                <p>Each deviation from EV-maximisation has a measurable dollar cost. The chart shows your 5 decisions plotted against the rational baseline.</p>
+                <p>Each dot shows your choice against the rational baseline. Pulled left of centre — you deviated. The further the distance, the larger your <strong>irrationality premium</strong>.</p>
+                <div class="step-cite">Thaler (1980) — mental accounting</div>
+            </div>
+
+
+
+        </div>
+        <div class="sticky-thing">
+            <div id="vis-rational"></div>
+        </div>
+    </section>
+
+    <!-- Ceiling breakout — full width -->
+    <section id="rational-intro">
+            <div class="two-agent-divider"></div>
+            <div class="phase-eyebrow">The Limit</div>
+            <h1>Rationality has a ceiling.</h1>
+            <p>Perfect EV maximisation only works in a <strong>fixed, known environment</strong>.<br>When the payoff depends on what someone else does — the landscape shifts. Individual optimisation isn't enough. <strong>This is where game theory begins.</strong></p>
+            <div class="ceiling-cite">Savage (1954)</div>
+            <div class="two-agent-divider"></div>
+
+    </section>
+
+    <!-- Section B: Optimisation Surface -->
+    <section id="surface-intro">
+        <div class="phase-eyebrow">Single Agent</div>
+        <h1>Finding the Minimum</h1>
+        <p>Before strategy, there's structure. Watch what single-agent optimisation looks like.</p>
+    </section>
+
+    <section id="scrolly-surface" class="scrolly-section">
+        <div class="scroll-text">
+
+            <div class="step" data-section="surface" data-step="9">
+                <h2>The Loss Landscape</h2>
+                <p>Every optimisation problem has a <strong>loss landscape</strong> — a surface where the height represents how bad a solution is. The goal: find the lowest point.</p>
+                <p>The marble starts at a random position. Gravity — gradient descent — pulls it downhill. It always moves in the direction of steepest descent.</p>
+                <div class="step-cite">Gradient descent — Cauchy (1847) · Rumelhart et al. (1986)</div>
+            </div>
+
+            <div class="step" data-section="surface" data-step="10">
+                <h2>Local vs Global Minimum</h2>
+                <p>The landscape has valleys. Some are shallow — <strong>local minima</strong>. One is deepest — the <strong>global minimum</strong>. A naive marble gets trapped. A smarter one escapes.</p>
+                <p>This is the fundamental tension of optimisation: exploration vs exploitation. Commit too early and you're stuck. Explore forever and you never converge.</p>
+                <div class="step-cite">Exploration-exploitation tradeoff — foundational to reinforcement learning</div>
+            </div>
+
+            <div class="step" data-section="surface" data-step="11">
+                <h2>Now Add Another Player</h2>
+                <p>A second marble appears. The surface <strong>shifts</strong> — the minimum moves based on where the other marble is. Each agent's optimal choice depends on the other's.</p>
+                <p>Individual gradient descent no longer works. You need a new solution concept. You need <strong>Nash Equilibrium</strong>.</p>
+                <div class="step-cite">Nash (1950)</div>
+            </div>
+
+        </div>
+        <div class="sticky-thing">
+            <div id="vis-surface"></div>
+        </div>
+    </section>
+
+    <!-- Section C: Stag Hunt + Game Theory -->
+    <section id="game-theory-intro">
+        <div class="phase-eyebrow">Two Agents</div>
+        <h1>Hawk-Dove: Evolutionary Equilibrium</h1>
+        <p>A mixed equilibrium. No pure strategy dominates — the population finds a precise stable ratio, regardless of where it starts.</p>
+    </section>
+
+    <section id="scrolly-stag" class="scrolly-section">
+        <div class="scroll-text">
+
+            <div class="step" data-section="stag" data-step="12">
+                <h2>Hawk-Dove: The Setup</h2>
+                <p>Two agents compete for a resource. A <span class="hl-loss">Hawk</span> always fights — high reward if they win, costly injury if they meet another Hawk. A <span class="hl-gain">Dove</span> always shares or retreats — safe, but never wins against a Hawk.</p>
+                <p>Neither pure strategy dominates. There's a stable equilibrium — but it's not all-Hawk or all-Dove. It's a <strong>precise ratio</strong>. Watch the population find it.</p>
+                <p>Use the controls. <strong>Try any starting percentage.</strong> The population always converges to the same place.</p>
+                <div class="step-cite">Maynard Smith &amp; Price (1973)</div>
+            </div>
+
+            <div class="step" data-section="stag" data-step="13">
+                <h2>Watch the Population Evolve</h2>
+                <p>Each round, agents compete against a random neighbour. Successful strategies spread. Costly ones retreat. The population is self-correcting — it drifts toward the equilibrium from any starting point.</p>
+                <p>This is what makes it an <strong>Evolutionarily Stable Strategy</strong>: not just a Nash equilibrium, but one that's resistant to invasion by any alternative strategy.</p>
+                <div class="step-cite">Maynard Smith (1982)</div>
+            </div>
+
+
+
+        </div>
+        <div class="sticky-thing" id="stag-sticky">
+            <div id="vis-stag"></div>
+        </div>
+    </section>
+
+   
+    <section id="rational-intro">
+
+            <div class="two-agent-divider"></div>
+      
+            <div class="phase-eyebrow">Two Agents</div>
+            <h1>Optimality for two agents.</h1>
+            <p>Single-agent: find the global minimum.<br>Two-agent: find the equilibrium that's also Pareto optimal.<br>The challenge isn't the mathematics — it's <strong>coordination under uncertainty</strong>.</p>
+            <div class="ceiling-cite">Nash (1950)</div>
+
+            <div class="two-agent-divider"></div>
+     
+    </section>
+
+    <!-- Phase 2 → Phase 3 bridge — inside phase2-content so hidden until phase2 shown -->
+    <div id="enter-phase3-bridge" style="text-align:center;padding:8vh 2rem 10vh;background:#F2EFE7;">
+        <p style="font-family:'Lora',serif;font-size:1.2rem;line-height:1.85;color:#4a4a4a;font-style:italic;max-width:560px;margin:0 auto 2.5rem;">
+            From a single decision under eight seconds of pressure — to 198 nations, to 70,000 nuclear warheads.<br>The mathematics doesn't change. The stakes do.
+        </p>
+        <button id="enter-phase3-btn" style="padding:1.1rem 2.8rem;font-family:'Roboto Mono',monospace;font-size:0.78rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;background:#1e1e1e;color:#F2EFE7;border:none;border-radius:3px;cursor:pointer;">
+            Continue
+        </button>
+    </div>
+
+</div><!-- end phase2-content -->
+
+<!-- ============================================================ -->
+<!-- PHASE 3: REAL WORLD                                          -->
+<!-- ============================================================ -->
+<div id="phase3-content" style="display:none;">
+
+    <!-- Bridge -->
+    <section id="phase3-bridge">
+        <div class="phase-eyebrow">Part III</div>
+        <h1>Game Theory in the Real World</h1>
+    </section>
+
+    <!-- ACT I: Montreal Protocol -->
+    <section id="scrolly-ozone" class="scrolly-section">
+        <div class="scroll-text">
+
+            <div class="step" data-section="ozone" data-step="1">
+                <h2>The Ozone Problem</h2>
+                <p>By the 1970s, scientists confirmed that CFCs — cheap, useful, widely manufactured — were destroying the stratospheric ozone layer. Every nation had an incentive to keep producing them. No nation had an incentive to stop unilaterally.</p>
+                <p>This is the <strong>collective action problem</strong> in its purest form. Individual rationality produces collective disaster. The Nash equilibrium is everyone keeps polluting.</p>
+                <div class="step-cite">Molina &amp; Rowland (1974)</div>
+            </div>
+
+            <div class="step" data-section="ozone" data-step="2">
+                <h2>The Cooperation Signal</h2>
+                <p>In 1987, 198 nations signed the Montreal Protocol — the first universally ratified treaty in UN history. They agreed to phase out ozone-depleting substances on a binding schedule.</p>
+                <p>Watch the chart. CFC production collapses. The ozone hole stabilises. By 2040 the ozone layer is expected to recover to 1980 levels. <strong>This is what successful cooperation looks like in data.</strong></p>
+                <div class="step-cite">Montreal Protocol (1987)</div>
+            </div>
+
+            <div class="step" data-section="ozone" data-step="3">
+                <h2>Why Did It Work?</h2>
+                <p>The Protocol succeeded because it was structured as a <strong>repeated game with verification</strong>. Binding commitments, phased schedules, and monitoring mechanisms transformed a one-shot defection trap into a cooperative equilibrium.</p>
+                <p>443 million skin cancer cases avoided. 2.3 million cancer deaths prevented. 0.5–1°C of warming avoided by mid-century. The payoff from cooperation, measured.</p>
+                <div class="step-cite">UNEP — 99% of ozone-depleting substances phased out</div>
+            </div>
+
+        </div>
+        <div class="sticky-thing">
+            <div id="vis-ozone"></div>
+        </div>
+    </section>
+
+    <!-- ACT II: Nuclear Arms Race -->
+    <section id="nuclear-intro">
+        <div class="phase-eyebrow">Act II — The Prisoner's Dilemma</div>
+        <h1>70,000 Warheads</h1>
+        <p style="font-family:'Roboto Mono',monospace;font-size:0.85rem;letter-spacing:1px;color:#aaa;">The most expensive Nash equilibrium in history.</p>
+    </section>
+
+    <section id="scrolly-nuclear" class="scrolly-section">
+        <div class="scroll-text">
+
+            <div class="step" data-section="nuclear" data-step="1">
+                <h2>The Trap</h2>
+                <p>The US-Soviet arms race is the textbook Prisoner's Dilemma. Both sides would be better off with mutual disarmament. But if one disarms while the other doesn't — catastrophic vulnerability.</p>
+                <p>The dominant strategy for both is to arm. The Nash equilibrium is mutual armament. <strong>Pareto inferior. Individually rational. Collectively catastrophic.</strong></p>
+                <div class="step-cite">Schelling (1960)</div>
+            </div>
+
+            <div class="step" data-section="nuclear" data-step="2">
+                <h2>The Escalation</h2>
+                <p>From 1945 to 1986, combined warhead counts climbed from hundreds to over <strong>70,000</strong>. Watch the lines diverge and reconverge. Every spike has a name: Sputnik. Cuba. MIRV. SDI.</p>
+                <p>The interesting finding: both sides actually <em>preferred</em> mutual reduction. What sustained the race was <strong>misperception</strong> — each side believed the other preferred unilateral armament.</p>
+                <div class="step-cite">Plous (1993)</div>
+            </div>
+
+            <div class="step" data-section="nuclear" data-step="3">
+                <h2>Communication Breaks the Trap</h2>
+                <p>SALT I (1972). SALT II (1979). START I (1991). Each treaty was a <strong>credible commitment device</strong> — transforming a one-shot defection game into a repeated game with verification.</p>
+                <p>By 1991, warhead counts began declining. The mechanism wasn't trust — it was <strong>structured repeated interaction with mutual verification</strong>. Exactly what game theory prescribes.</p>
+                <div class="step-cite">START I (1991) — structured verification enables cooperation</div>
+            </div>
+
+        </div>
+        <div class="sticky-thing">
+            <div id="vis-nuclear"></div>
+        </div>
+    </section>
+
+    <!-- ACT III: Human-AI -->
+    <section id="ai-intro">
+        <div class="phase-eyebrow">Act III — The Game We're Playing Now</div>
+        <h1>Human &amp; AI</h1>
+        <p>The most consequential strategic interaction of this century. Play it yourself.</p>
+    </section>
+
+    <section id="scrolly-ai" class="scrolly-section">
+        <div class="scroll-text">
+
+            <div class="step" data-section="ai" data-step="1">
+                <h2>AI Plays Too Rationally</h2>
+                <p>When GPT-4 plays economic games, it excels at pure logic — but struggles with cooperation. Researchers found it would <strong>spot a threat and retaliate instantly</strong>, but couldn't build trust incrementally.</p>
+                <p>The same trait that makes AI a perfect calculator makes it a poor cooperator — it optimises too aggressively, too fast.</p>
+                <div class="step-cite">Akata et al. (2023)</div>
+            </div>
+
+            <div class="step" data-section="ai" data-step="2">
+                <h2>But Humans Exploit AI</h2>
+                <p>The dynamic runs both ways. In cross-cultural experiments, <strong>US participants cooperated with AI significantly less than with humans</strong>. They felt bad exploiting humans — not machines.</p>
+                <p>Japanese participants treated AI and humans equivalently. The asymmetry is cultural, not rational. We apply different moral frameworks to agents we perceive as non-human.</p>
+                <div class="step-cite">Nature Scientific Reports (2025)</div>
+            </div>
+
+            <div class="step" data-section="ai" data-step="3">
+                <h2>Play the Game</h2>
+                <p>You're now playing a Prisoner's Dilemma against a real AI. Each round you choose to <strong>Cooperate</strong> or <strong>Defect</strong>. The AI sees your history and responds.</p>
+                <div class="step-cite">Zimmaro et al. (2024)</div>
+            </div>
+
+            <div class="step" data-section="ai" data-step="4">
+                <h2>What Just Happened?</h2>
+                <p>Each personality you played against was a <strong>real Claude model</strong> given a different system prompt — not a scripted bot. The Mirror tracked your pattern. The Negotiator required two consecutive cooperates before trusting again. The Opportunist was prompted to build trust then defect. The Cold Strategist was told: one defection ends cooperation permanently.</p>
+                <p>Same AI. Different instructions. Completely different emergent behaviour. This is what makes the alignment problem hard — the question isn't whether AI can cooperate, it's <strong>which AI you're dealing with, and what it was told to want.</strong></p>
+                <div class="step-cite">Axelrod (1984) · Akata et al. (2023)</div>
+            </div>
+
+        </div>
+        <div class="sticky-thing">
+            <div id="vis-ai"></div>
+        </div>
+    </section>
+
+    <!-- Phase 3 bridge to bibliography -->
+    <div id="phase3-end">
+        <p>From a single decision under eight seconds of pressure, to 198 nations, to the architecture of AI alignment — the mathematics of strategic choice runs through all of it.</p>
+        <button id="enter-biblio-btn">Sources &amp; Methodology</button>
+    </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- BIBLIOGRAPHY                                                  -->
+<!-- ============================================================ -->
+<div id="bibliography-content" style="display:none;background:#F2EFE7;padding:10vh 2rem 14vh;">
+    <div style="max-width:760px;margin:0 auto;">
+
+        <div style="font-family:'Roboto Mono',monospace;font-size:0.62rem;letter-spacing:5px;text-transform:uppercase;color:#aaa;text-align:center;margin-bottom:3rem;">Bibliography &amp; Scoring Methodology</div>
+
+        <h2 class="bib-h2">References</h2>
+
+        <div class="bib-section">
+            <div class="bib-section-title">Human Decision-Making</div>
+            <div class="bib-entry"><div class="bib-authors">Kahneman, D. &amp; Tversky, A.</div><div class="bib-title">Prospect Theory: An Analysis of Decision under Risk</div><div class="bib-journal"><em>Econometrica</em>, 47(2), 263–291. (1979)</div><div class="bib-note">The foundational paper. Most cited in economics. Establishes the value function, loss aversion, and certainty effect used throughout Part I.</div></div>
+            <div class="bib-entry"><div class="bib-authors">Ruggeri, K. et al.</div><div class="bib-title">Replicating patterns of Prospect Theory for decision under risk</div><div class="bib-journal"><em>Nature Human Behaviour</em>, 4, 622–633. (2020)</div><div class="bib-note">19 countries, 13 languages. 90% replication rate of Kahneman &amp; Tversky's original findings. Basis for population distribution data.</div></div>
+            <div class="bib-entry"><div class="bib-authors">Thaler, R.</div><div class="bib-title">Toward a Positive Theory of Consumer Choice</div><div class="bib-journal"><em>Journal of Economic Behavior &amp; Organization</em>, 1(1), 39–60. (1980)</div><div class="bib-note">Mental accounting and the sunk cost fallacy. Basis for Q3 scoring.</div></div>
+            <div class="bib-entry"><div class="bib-authors">von Neumann, J. &amp; Morgenstern, O.</div><div class="bib-title">Theory of Games and Economic Behavior</div><div class="bib-journal">Princeton University Press. (1944)</div><div class="bib-note">Expected Utility Theory — the rational baseline used throughout Part II.</div></div>
+            <div class="bib-entry"><div class="bib-authors">Savage, L.J.</div><div class="bib-title">The Foundations of Statistics</div><div class="bib-journal">Wiley. (1954)</div><div class="bib-note">The limits of individual rationality. Basis for the "ceiling" breakout.</div></div>
+        </div>
+
+        <div class="bib-section">
+            <div class="bib-section-title">Game Theory &amp; Evolutionary Dynamics</div>
+            <div class="bib-entry"><div class="bib-authors">Nash, J.</div><div class="bib-title">Equilibrium Points in n-Person Games</div><div class="bib-journal"><em>Proceedings of the National Academy of Sciences</em>, 36(1), 48–49. (1950)</div><div class="bib-note">The Nash Equilibrium. Every finite game has at least one.</div></div>
+            <div class="bib-entry"><div class="bib-authors">Maynard Smith, J. &amp; Price, G.R.</div><div class="bib-title">The Logic of Animal Conflict</div><div class="bib-journal"><em>Nature</em>, 246, 15–18. (1973)</div><div class="bib-note">Introduced the Evolutionarily Stable Strategy. ESS = V/C. Basis for Hawk-Dove simulation with V=2, C=4, ESS=50%.</div></div>
+            <div class="bib-entry"><div class="bib-authors">Axelrod, R.</div><div class="bib-title">The Evolution of Cooperation</div><div class="bib-journal">Basic Books. (1984)</div><div class="bib-note">Tit-for-Tat wins every iterated Prisoner's Dilemma tournament. Basis for AI game personality design.</div></div>
+        </div>
+
+        <div class="bib-section">
+            <div class="bib-section-title">Real-World Game Theory</div>
+            <div class="bib-entry"><div class="bib-authors">Montreal Protocol</div><div class="bib-title">Montreal Protocol on Substances that Deplete the Ozone Layer</div><div class="bib-journal">United Nations Environment Programme. (1987)</div><div class="bib-note">198 parties. First universally ratified UN treaty. 99% of ozone-depleting substances phased out. Recovery to 1980 levels expected by 2040.</div></div>
+            <div class="bib-entry"><div class="bib-authors">Plous, S.</div><div class="bib-title">The Nuclear Arms Race: Prisoner's Dilemma or Perceptual Dilemma?</div><div class="bib-journal"><em>Journal of Peace Research</em>, 30(2), 163–179. (1993)</div><div class="bib-note">Both sides preferred mutual reduction but each perceived the other as preferring unilateral armament — the "Perceptual Dilemma."</div></div>
+            <div class="bib-entry"><div class="bib-authors">Akata, E. et al.</div><div class="bib-title">Playing Repeated Games with Large Language Models</div><div class="bib-journal">Helmholtz Munich. (2023)</div><div class="bib-note">GPT-4 struggles with trust-building. Social Chain-of-Thought prompting improves cooperation rates significantly.</div></div>
+            <div class="bib-entry"><div class="bib-authors">Zimmaro, L.A. et al.</div><div class="bib-title">Unconditionally cooperative AI promotes human cooperation</div><div class="bib-journal"><em>Journal of the Royal Society Interface</em>. (2024)</div><div class="bib-note">"Samaritan AI" promotes higher cooperation rates in human players than discriminatory AI strategies.</div></div>
+        </div>
+
+        <h2 class="bib-h2" style="margin-top:3.5rem;">Scoring Methodology</h2>
+
+        <div class="bib-section">
+            <div class="bib-section-title">Consistency Score</div>
+            <div class="bib-score-box">Compares Q1 (gain frame) and Q2 (loss frame). Both questions have identical expected values. A consistent decision-maker applies the same risk attitude regardless of framing. <strong>100% = same choice type in both frames. 0% = classic loss aversion flip.</strong> Binary by design — there is no partial consistency.</div>
+        </div>
+        <div class="bib-section">
+            <div class="bib-section-title">Rationality Score</div>
+            <div class="bib-score-box">Measured across Q3, Q4, and Q5 — the three questions with a clear objectively rational answer per Expected Utility Theory. <strong>Q3:</strong> Stay home (sunk cost is irrelevant to the forward decision). <strong>Q4:</strong> $150 in a year (+50% return, strictly dominant). <strong>Q5:</strong> Gamble ($60 EV &gt; $40 certain). One point per rational answer ÷ 3.</div>
+        </div>
+        <div class="bib-section">
+            <div class="bib-section-title">Like Everyone Score</div>
+            <div class="bib-score-box">Compares your answers to empirically measured population baselines. <strong>Q1 left (Sure $500):</strong> 80% of people. <strong>Q2 right (Gamble):</strong> 70%. <strong>Q3 left (Go anyway):</strong> 65%. <strong>Q4 left ($100 now):</strong> 72%. <strong>Q5 left (Sure $40):</strong> 68%. One point per match with the majority choice ÷ 5.</div>
+        </div>
+
+    </div>
+</div>
+
+<script src="js/main.js"></script>
+<script src="js/visualisations.js"></script>
+<script src="js/phase2-visualisations.js"></script>
+<script src="js/phase3-visualisations.js"></script>
+</body>
+</html>
+
