@@ -288,3 +288,20 @@ footer small { display: block; margin-top: 64px; font-size: 14px; color: #a9bfb2
 .reader-bar a { color: #f3f0e8; text-underline-offset: 3px; white-space: nowrap; }
 .reader-bar button { font: inherit; font-weight: 600; color: var(--ink); background: #f3f0e8; border: 0; border-radius: 999px; padding: 8px 16px; cursor: pointer; white-space: nowrap; }
 .reader iframe { flex: 1; width: 100%; border: 0; border-radius: 14px; background: #fff; }
+
+/* army row and the four-photo row */
+.photos.army { grid-template-columns: 1fr 1.3fr 1.3fr; margin-bottom: 24px; }
+.photos.army figure:nth-child(1) img { object-position: center 35%; }
+.photos.army figure:nth-child(3) img { object-position: center; }
+.photos figure.board { background: #b08408; }
+.photos figure.board img { object-fit: contain; }
+.photos figure.board:hover img { transform: none; }
+.photos.four { grid-template-columns: 1fr 1.5fr 1fr 1.5fr; }
+.photos.four figure:nth-child(1) img { object-position: center 20%; }
+.photos.four figure:nth-child(2) img { object-position: 70% 30%; }
+.photos.four figure:nth-child(3) img { object-position: center 30%; }
+@media (max-width: 960px) {
+  .photos.army, .photos.four { grid-template-columns: 1fr 1fr; }
+  .photos.army figure:nth-child(2), .photos.four figure:nth-child(2) { grid-column: auto; grid-row: auto; height: 260px; }
+  .photos.army figure:nth-child(3) { grid-column: 1 / -1; height: 200px; }
+}
