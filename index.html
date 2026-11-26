@@ -55,7 +55,7 @@
   <div class="wrap">
     <div class="head">
       <h2>Research</h2>
-      <p>With Herbert Chang and Evergreen AI at Dartmouth</p>
+      <p>With Herbert Chang and <a href="https://evergreen.dartmouth.edu/" target="_blank" rel="noopener">Evergreen</a> at Dartmouth</p>
     </div>
 
     <article class="feature">
@@ -218,8 +218,8 @@
       <li><span class="role">Consumer insights &amp; research intern <i>incoming</i></span><span class="org">TSG Consumer</span><span class="when">Summer 2027</span></li>
       <li><span class="role">Teaching assistant, Discrete Mathematics</span><span class="org">Dartmouth College</span><span class="when">Sep 2026 – now</span></li>
       <li><span class="role">Actuarial &amp; machine learning intern</span><span class="org"><a href="https://ipxos.ai" target="_blank" rel="noopener">IPXos</a>, Singapore</span><span class="when">Jun – Sep 2026</span></li>
-      <li><span class="role">ML researcher &amp; software developer</span><span class="org">Evergreen AI, Dartmouth</span><span class="when">Jan 2026 – now</span></li>
-      <li><span class="role">Founder &amp; president</span><span class="org">Music + Vibes = Changing Lives, Singapore</span><span class="when">Jun 2024 – Jun 2026</span></li>
+      <li><span class="role">ML researcher &amp; software developer</span><span class="org"><a href="https://evergreen.dartmouth.edu/" target="_blank" rel="noopener">Evergreen</a>, Dartmouth</span><span class="when">Jan 2026 – now</span></li>
+      <li><span class="role">Founder &amp; president</span><span class="org"><a href="https://www.instagram.com/musicvibeschanginglives" target="_blank" rel="noopener">Music + Vibes = Changing Lives</a>, Singapore</span><span class="when">Jun 2024 – Jun 2026</span></li>
       <li><span class="role">Platoon sergeant</span><span class="org">Singapore Armed Forces</span><span class="when">Jul 2023 – May 2025</span></li>
       <li><span class="role">Economics tutor &amp; content curator</span><span class="org">MathVision, Singapore</span><span class="when">Apr – Jun 2023</span></li>
     </ul>
@@ -265,10 +265,18 @@
 
 <section id="life">
   <div class="wrap">
+    <div class="head">
+      <h2>Outside</h2>
+      <div class="chips">
+        <a href="https://anshwrites562048625.wordpress.com" target="_blank" rel="noopener">Blog: Just One More Page</a>
+        <a href="https://www.instagram.com/musicvibeschanginglives" target="_blank" rel="noopener">Music + Vibes on Instagram</a>
+        <a href="https://www.kindness.sg/get-inspired#gums" target="_blank" rel="noopener">Singapore Kindness Movement</a>
+      </div>
+    </div>
     <div class="photos">
-      <figure><img src="assets/img/guitar.jpg" alt="Ansh playing electric guitar on stage in a Dartmouth sweater" loading="lazy" /><figcaption>Guitar, Dartmouth</figcaption></figure>
+      <figure><img src="assets/img/kindness-award.jpg" alt="Ansh holding a certificate on stage beside two presenters and the Kindness Day SG mascot" loading="lazy" /><figcaption>Singapore Kindness Award, 2025</figcaption></figure>
       <figure><img src="assets/img/mountain.jpg" alt="A figure sitting on a rock above a valley, with snow peaks behind" loading="lazy" /></figure>
-      <figure><img src="assets/img/tada-talk.jpg" alt="Ansh giving a talk at Text as Data 2026" loading="lazy" /><figcaption>TADA 2026</figcaption></figure>
+      <figure><img src="assets/img/guitar.jpg" alt="Ansh playing electric guitar on stage in a Dartmouth sweater" loading="lazy" /><figcaption>Guitar, Dartmouth</figcaption></figure>
     </div>
   </div>
 </section>
@@ -280,11 +288,48 @@
       <a class="pill" href="mailto:ansh.p.oswal.29@dartmouth.edu">ansh.p.oswal.29@dartmouth.edu</a>
       <a class="pill ghost" href="card.html" target="_blank" rel="noopener">Contact card ↗</a>
       <a class="pill ghost" href="https://github.com/anshposwal29" target="_blank" rel="noopener">GitHub ↗</a>
+      <a class="pill ghost" href="https://anshwrites562048625.wordpress.com" target="_blank" rel="noopener">Blog ↗</a>
       <a class="pill ghost" href="https://www.linkedin.com/in/ansh-pritam-oswal" target="_blank" rel="noopener">LinkedIn ↗</a>
     </div>
     <small>Hanover, New Hampshire, and Singapore.</small>
   </div>
 </footer>
+
+<!-- In-page paper reader. Any link to a PDF opens here on desktop; phones and
+     modified clicks fall through to the normal new-tab behaviour. -->
+<div class="reader" id="reader" role="dialog" aria-modal="true" aria-label="Paper reader" hidden>
+  <div class="reader-bar">
+    <span id="readerTitle">Paper</span>
+    <a id="readerOpen" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
+    <button id="readerClose" type="button">Close ✕</button>
+  </div>
+  <iframe id="readerFrame" title="Paper" src="about:blank"></iframe>
+</div>
+
+<script>
+(function () {
+  var reader = document.getElementById('reader'), frame = document.getElementById('readerFrame');
+  var touch = /iP(hone|ad|od)|Android/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
+  function close() { reader.hidden = true; frame.src = 'about:blank'; document.body.style.overflow = ''; }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a || a.id === 'readerOpen') return;
+    if (!/\.pdf($|[?#])/i.test(a.getAttribute('href'))) return;
+    if (touch || window.innerWidth < 860 || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+    e.preventDefault();
+    var card = a.closest('article, .book, .project');
+    var h = card && card.querySelector('h3');
+    document.getElementById('readerTitle').textContent = h ? h.textContent.trim() : 'Paper';
+    document.getElementById('readerOpen').href = a.href;
+    frame.src = a.href + '#view=FitH';
+    reader.hidden = false; document.body.style.overflow = 'hidden';
+    document.getElementById('readerClose').focus();
+  });
+  document.getElementById('readerClose').addEventListener('click', close);
+  reader.addEventListener('click', function (e) { if (e.target === reader) close(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !reader.hidden) close(); });
+})();
+</script>
 
 </body>
 </html>

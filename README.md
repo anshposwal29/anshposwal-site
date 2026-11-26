@@ -1,48 +1,79 @@
-# Ansh Pritam Oswal — personal site
+# Ansh Pritam Oswal: personal site
 
-Static, zero-build site. Files:
+Live at https://anshposwal.vercel.app. A static site with no build step: plain HTML and CSS, deployed by pushing to `main`.
 
-- `index.html` — home (hero, about, work, coursework, toolkit)
-- `projects.html` — projects grid (data-driven; edit the `PROJECTS` list)
-- `style.css` — shared styles
-- `assets/` — put images here (see below)
+## The approach: show, don't tell
 
-## Add your images (required)
+Each piece of work is shown by its evidence (a figure, a photo, a number, a line from the paper) and kept to one or two sentences of text. Every item links to proof: the paper, the code, a live site, or a poster.
 
-Drop these two files into an `assets/` folder next to the HTML:
+Three rules the page follows:
 
-- `assets/hero-mountain.jpg` — mountain photo → home hero background
-- `assets/profile.jpg` — headshot → avatar circle
+1. **Every entry has something to look at.** In order of preference: a real figure from the work, a photo of it happening, two or three headline numbers, a line quoted from the paper.
+2. **Every image must be readable at the size it is shown.** A first-page thumbnail of a PDF is not readable, so it is not used. Wide multi-panel figures are cropped to the few panels that can be read (the markets chart shows 4 of 10 panels; the poster shows one finding).
+3. **Every entry has a proof link, or says it is in preparation.** Work without a public artefact sits in the dashed "in preparation" cards and carries no link.
 
-Project screenshots and PDFs also go in `assets/` and are linked from `projects.html`.
+## Pages
 
-## Deploy to Vercel (free)
+| URL | File | What it is |
+|---|---|---|
+| `/` | `index.html` | The site: research, papers, project, experience, photos |
+| `/card` | `card.html` | Digital contact card with "Add to Contacts"; opens in its own tab |
+| `/home` | (redirect) | Old address, redirects to `/` (see `vercel.json`) |
+| `/projects` | `projects.html` | The older editable projects page. No longer linked from the site |
+
+## Files
+
+- `index.html`: all content, in page order. One long file, no templates.
+- `site.css`: all styles for `index.html`. Colours and fonts are variables at the top.
+- `card.html`: self-contained (inline styles and the vCard).
+- `assets/papers/`: the PDFs that the page links to.
+- `assets/img/`: figures (`fig-*.png/jpg`) and photos.
+- `assets_photos/`: original photos. Not committed.
+- `api/`, `projects-data.js`, `style.css`, `projects.html`: the older projects page and its Vercel Blob backend.
+
+## Sections of `index.html` and the block each one uses
+
+| Section | Block | Use it for |
+|---|---|---|
+| Research, lead item | `article.feature` | The one piece of work to lead with: photo, title, link chips, then a full-width figure |
+| Research | `article.withfig` | Figure on one side, text on the other. Add `flip` to swap sides |
+| Research | `.nums` inside `withfig` | Work with no figure: three headline numbers instead |
+| Research | `article.work` | In preparation, in progress, or earlier work with no public artefact |
+| Papers | `article.withfig` | A paper that has a figure |
+| Papers | `a.book` | A paper with no figure: a coloured card with one quoted line (`.sheet.t1` to `.t5` set the colour) |
+| Project | `.project` | One project: text beside a cropped figure |
+| Experience | `ul.xp li` | One row per role: title, organisation, dates |
+| Experience | `.stats`, `.facts` | Three big numbers, then cards of short tags |
+| Outside | `.photos figure` | Photos, with an optional caption pill |
+
+Links inside an entry go in `<div class="chips">`. The main proof link gets `class="main"` (green); the rest are outlined.
+
+## Paper reader and code links
+
+- Any link to a `.pdf` opens in an in-page reader on desktop, with "Open in new tab" and Close (Esc also closes). On phones, or with Cmd/Ctrl-click, the PDF opens in a new tab instead. The script is at the bottom of `index.html`.
+- Code links go to the public GitHub repositories. A repository that is private must not be linked; link a report or paper instead.
+
+## Adding a piece of work
+
+1. Put the PDF in `assets/papers/` with a lower-case hyphenated name.
+2. Make the image:
+   - A figure: export it from the paper's source at about 1,500 to 2,000 px wide, or crop it from the PDF with `pdftoppm -r 150 -png -singlefile paper.pdf out` and an image editor. Check it is readable at about 650 px wide.
+   - A photo: resize to at most 1,600 px on the long side.
+   - Neither: pick three numbers (`.nums`) or one sentence quoted from the paper (`a.book`).
+3. Copy the nearest existing block in `index.html` and change the text, image and links. Keep the description to two sentences.
+4. Open `index.html` in a browser and check the image is readable and every link works.
+
+## Design
+
+- Type: Instrument Serif for headings and numbers, Hanken Grotesk for everything else (Google Fonts).
+- Colour: warm paper background `#f3f0e8`, near-black text, Dartmouth green `#00693e` for links and labels, deep green `#0c3b28` for the dark panels and footer.
+- One accent colour only. Charts keep their own colours.
+
+## Deploy
 
 ```bash
-gh auth switch --user anshposwal29   # make sure you're NOT on ansh-ipxos
-gh auth status
-
-git init && git add . && git commit -m "Personal site v1"
-gh repo create anshposwal29/personal-site --public --source=. --push
-
-npm i -g vercel
-vercel --prod        # framework preset: Other
+gh auth status          # the active account must be anshposwal29
+git add -A && git commit -m "..." && git push origin main
 ```
 
-You'll get a free `anshposwal.vercel.app` URL. Add a custom domain (`anshoswal.com`, ~$10–15/yr) later under Project → Settings → Domains; hosting stays free.
-
-## Add a project
-
-In `projects.html`, edit the `PROJECTS = [ ... ]` array. Each entry:
-
-```js
-{
-  title: "Project name",
-  desc: "One or two sentences.",
-  tags: ["Python", "ML"],
-  image: "assets/screenshot.png",   // optional
-  links: { "GitHub": "https://github.com/...", "Paper (PDF)": "assets/paper.pdf" }
-}
-```
-
-Empty or missing links/images are hidden automatically.
+Vercel deploys `main` automatically within about a minute.

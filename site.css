@@ -273,5 +273,18 @@ footer small { display: block; margin-top: 64px; font-size: 14px; color: #a9bfb2
 }
 
 /* photo crops */
-.photos figure:nth-child(1) img { object-position: center 30%; }
-.photos figure:nth-child(3) img { object-position: 12% center; }
+.photos figure:nth-child(1) img { object-position: 30% 40%; }
+.photos figure:nth-child(3) img { object-position: center 30%; }
+
+.head .chips { margin-top: 0; }
+.head p a { color: var(--green); text-underline-offset: 3px; }
+
+/* ---------- in-page paper reader ---------- */
+
+.reader { position: fixed; inset: 0; z-index: 50; background: rgba(18, 19, 17, .72); display: flex; flex-direction: column; padding: 22px 28px 28px; }
+.reader[hidden] { display: none; }
+.reader-bar { display: flex; align-items: center; gap: 18px; color: #f3f0e8; padding: 0 4px 14px; font-size: 15px; }
+.reader-bar span { font-family: var(--display); font-size: 24px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.reader-bar a { color: #f3f0e8; text-underline-offset: 3px; white-space: nowrap; }
+.reader-bar button { font: inherit; font-weight: 600; color: var(--ink); background: #f3f0e8; border: 0; border-radius: 999px; padding: 8px 16px; cursor: pointer; white-space: nowrap; }
+.reader iframe { flex: 1; width: 100%; border: 0; border-radius: 14px; background: #fff; }
