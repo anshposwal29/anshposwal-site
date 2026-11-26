@@ -19,6 +19,7 @@ Three rules the page follows:
 | URL | File | What it is |
 |---|---|---|
 | `/` | `index.html` | The site: research, papers, project, experience, photos |
+| `/work/game-theory`, `/work/chess-openings` | `work/*/index.html` | Two interactive D3 pieces from QSS 19, hosted as they were built |
 | `/card` | `card.html` | Digital contact card with "Add to Contacts"; opens in its own tab |
 | `/home` | (redirect) | Old address, redirects to `/` (see `vercel.json`) |
 | `/projects` | (redirect) | The old projects page was removed; redirects to `/` |
@@ -40,9 +41,8 @@ Three rules the page follows:
 | Research | `article.withfig` | Figure on one side, text on the other. Add `flip` to swap sides |
 | Research | `.nums` inside `withfig` | Work with no figure: three headline numbers instead |
 | Research | `details.more` | Dropdowns for work in progress and earlier work with no public artefact |
-| Papers | `article.withfig` | A paper that has a figure |
-| Papers | `a.book` | A paper with no figure: a coloured card with one quoted line (`.sheet.t1` to `.t5` set the colour) |
-| Project | `.project` | One project: text beside a cropped figure |
+| Works of interest | `article.withfig` | A project or paper that has a figure. Add `shot` when the image is a screenshot of an interactive piece |
+| Works of interest | `a.book` | A paper with no figure: a coloured card with one quoted line (`.sheet.t1` to `.t5` set the colour) |
 | Experience | `ul.xp li` | One row per role: title, organisation, dates |
 | Experience | `.army` | Text beside photos for one role |
 | Education | `dl.ledger` | Ruled rows: a label on the left, a plain sentence on the right. Coursework is a `ul.courselist` |
@@ -54,6 +54,10 @@ Links inside an entry go in `<div class="chips">`. The main proof link gets `cla
 
 - Any link to a `.pdf` opens in an in-page reader on desktop, with "Open in new tab" and Close (Esc also closes). On phones, or with Cmd/Ctrl-click, the PDF opens in a new tab instead. The script is at the bottom of `index.html`.
 - Code links go to the public GitHub repositories. A repository that is private must not be linked; link a report or paper instead.
+
+## The index
+
+The pill fixed at the bottom of the page opens a list of every paper and every codebase or demo. It is a hand-written list (`#index` near the bottom of `index.html`): when you add a paper or a repository, add a line there and update the counts on the button.
 
 ## Adding a piece of work
 
